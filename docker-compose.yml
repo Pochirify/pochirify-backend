@@ -1,0 +1,16 @@
+---
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: ./dev/containers/app
+    ports:
+      - ${PORT}:8080
+    volumes:
+      - .:/go/src/github.com/Pochirify/pochirify-backend:cached
+      - /Users/apple/go/pkg/mod:/go/pkg/mod:cached
+    environment:
+      PORT: 8080
+    working_dir: /go/src/github.com/Pochirify/pochirify-backend
+    command: go run .

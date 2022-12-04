@@ -1,0 +1,79 @@
+package http
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"net/http"
+
+	gqlhandler "github.com/99designs/gqlgen/graphql/handler"
+	"github.com/go-chi/chi"
+
+	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/resolver"
+	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/schema"
+	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/middleware"
+	webhookv1 "github.com/Pochirify/pochirify-backend/internal/handler/http/internal/webhook/v1"
+	"github.com/Pochirify/pochirify-backend/internal/handler/logger"
+	"github.com/Pochirify/pochirify-backend/internal/usecase"
+)
+
+type Server struct {
+	port   uint
+	router *chi.Mux
+}
+
+type Config struct {
+	Port   uint
+	Logger logger.Logger
+
+	App usecase.App
+}
+
+func NewServer(ctx context.Context, c *Config) *Server {
+	router := chi.NewRouter()
+	router.Use(middleware.NewRequestLogger(newLoggerFactory(c.Logger.WithName("request_logger"))))
+
+	config := &resolver.Config{App: c.App}
+	srv := gqlhandler.NewDefaultServer(
+		schema.NewExecutableSchema(
+			schema.Config{Resolvers: resolver.NewResolver(config)},
+		),
+	)
+
+	webhookHandler := webhookv1.NewWebhookHandler(c.App)
+	router.Handle("/webhook", webhookHandler.PayPayTransactionEventHandler())
+
+	router.Handle("/query", srv)
+
+	log.Printf("connect to http://localhost:%d/ for GraphQL playground", c.Port)
+
+	return &Server{
+		port:   c.Port,
+		router: router,
+	}
+}
+
+func (s *Server) Start() error {
+	return http.ListenAndServe(fmt.Sprintf(":%d", s.port), s.router)
+}
+
+func newLoggerFactory(l logger.Logger) logger.Factory {
+	return func(ctx context.Context) logger.Logger {
+		// md, ok := metadata.FromIncomingContext(ctx)
+		// if !ok {
+		// 	return l
+		// }
+
+		// rid := md.Get("X-ASIA-REQUEST-ID")
+		// if len(rid) == 0 {
+		// 	return l
+		// }
+
+		// traceContextID := tracerctx.GetTraceContextID(ctx)
+
+		// return l.WithValues("request_id", rid).WithValues("logging.googleapis.com/trace", traceContextID)
+		return l
+	}
+}
+
+// func handler() http.Handler {}
