@@ -8,6 +8,7 @@ import (
 
 	gqlhandler "github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/cors"
 
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/resolver"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/schema"
@@ -30,8 +31,13 @@ type Config struct {
 }
 
 func NewServer(ctx context.Context, c *Config) *Server {
-	router := chi.NewRouter()
-	router.Use(middleware.NewRequestLogger(newLoggerFactory(c.Logger.WithName("request_logger"))))
+	r := chi.NewRouter()
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+		// AllowedHeaders: []string{"Accept", "Authorization", "Content-Type"},
+	}))
+	r.Use(middleware.NewRequestLogger(newLoggerFactory(c.Logger.WithName("request_logger"))))
 
 	config := &resolver.Config{App: c.App}
 	srv := gqlhandler.NewDefaultServer(
@@ -41,15 +47,15 @@ func NewServer(ctx context.Context, c *Config) *Server {
 	)
 
 	webhookHandler := webhookv1.NewWebhookHandler(c.App)
-	router.Handle("/webhook", webhookHandler.PayPayTransactionEventHandler())
+	r.Handle("/api/webhook", webhookHandler.PayPayTransactionEventHandler())
 
-	router.Handle("/query", srv)
+	r.Handle("/api/query", srv)
 
 	log.Printf("connect to http://localhost:%d/ for GraphQL playground", c.Port)
 
 	return &Server{
 		port:   c.Port,
-		router: router,
+		router: r,
 	}
 }
 
