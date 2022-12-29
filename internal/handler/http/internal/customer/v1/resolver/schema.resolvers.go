@@ -7,15 +7,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/graqhql"
+	graphql1 "github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/graphql"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/schema"
 	"github.com/Pochirify/pochirify-backend/internal/usecase"
 	"github.com/google/uuid"
 )
 
 // CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input graqhql.NewTodo) (*graqhql.Todo, error) {
-	todo := graqhql.Todo{
+func (r *mutationResolver) CreateTodo(ctx context.Context, input graphql1.NewTodo) (*graphql1.Todo, error) {
+	todo := graphql1.Todo{
 		ID:   uuid.NewString(),
 		Text: input.Text,
 		Done: false,
@@ -24,12 +24,12 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input graqhql.NewTodo
 }
 
 // CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, input graqhql.NewUser) (*graqhql.User, error) {
+func (r *mutationResolver) CreateUser(ctx context.Context, input graphql1.NewUser) (*graphql1.User, error) {
 	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
 }
 
 // CreatePaypayQRCode is the resolver for the createPaypayQRCode field.
-func (r *mutationResolver) CreatePaypayQRCode(ctx context.Context, input graqhql.PaypayQRCodeInput) (*graqhql.CreatePaypayQRCodePayload, error) {
+func (r *mutationResolver) CreatePaypayQRCode(ctx context.Context, input graphql1.PaypayQRCodeInput) (*graphql1.CreatePaypayQRCodePayload, error) {
 	output, err := r.App.CreatePaypayQRCode(ctx, &usecase.CreatePaypayQRCodeInput{
 		EmailAddress: input.EmailAddress,
 		PhoneNumber:  input.PhoneNumber,
@@ -45,31 +45,97 @@ func (r *mutationResolver) CreatePaypayQRCode(ctx context.Context, input graqhql
 		return nil, err
 	}
 
-	return &graqhql.CreatePaypayQRCodePayload{
+	return &graphql1.CreatePaypayQRCodePayload{
 		URL:      output.QRCode.QRCodeUrl,
 		DeepLink: output.QRCode.QRCodeDeepLink,
 	}, nil
 }
 
 // Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*graqhql.Todo, error) {
-	return []*graqhql.Todo{
+func (r *queryResolver) Todos(ctx context.Context) ([]*graphql1.Todo, error) {
+	return []*graphql1.Todo{
 		{Text: "text"},
 	}, nil
 }
 
 // Users is the resolver for the users field.
-func (r *queryResolver) Users(ctx context.Context) ([]*graqhql.User, error) {
+func (r *queryResolver) Users(ctx context.Context) ([]*graphql1.User, error) {
 	panic(fmt.Errorf("not implemented: Users - users"))
 }
 
+// VariantGroupDetail is the resolver for the variantGroupDetail field.
+func (r *queryResolver) VariantGroupDetail(ctx context.Context, id string) (*graphql1.VariantGroupDetail, error) {
+	return &graphql1.VariantGroupDetail{
+		VariantGroup: &graphql1.VariantGroup{
+			ID:    id,
+			Title: "八天堂の商品たち",
+			ImageURLs: []string{
+				"https://storage.googleapis.com/adfsafdafd/image%2010%20(1).png",
+				"https://storage.googleapis.com/pochirify-dev-server-assets/product_images/pic_prod_02%202.png",
+			},
+			DeliveryTimeRange: &graphql1.DeliveryTimeRange{
+				From: "12/11",
+				To:   "12/13",
+			},
+			FaqImageURL: &graphql1.WebpPngImageURL{
+				WebpURL: "https://storage.googleapis.com/adfsafdafd/FAQ.webp",
+				PngURL:  "https://storage.googleapis.com/adfsafdafd/image%2010%20(1).png",
+			},
+			DescriptionImageURL: &graphql1.WebpPngImageURL{
+				WebpURL: "https://storage.googleapis.com/pochirify-dev-server-assets/variant_group_descriptions/description.webp",
+				PngURL:  "https://storage.googleapis.com/pochirify-dev-server-assets/variant_group_descriptions/description.png",
+			},
+			BadgeImageURL: "https://storage.googleapis.com/pochirify-dev-server-assets/variang_group_badges/badges.png",
+		},
+		Variants: []*graphql1.Product{
+			{
+				ID:    "1",
+				Title: "お歳暮 ギフトセット",
+				Price: 4800,
+				Contents: []string{
+					"クリームパン ✖️1",
+					"クリームパン 茶色 ✖️2",
+				},
+				ImageURL: "https://storage.googleapis.com/adfsafdafd/image%2010%20(1).png",
+			},
+			{
+				ID:    "2",
+				Title: "お歳暮 ギフトセット2",
+				Price: 3800,
+				Contents: []string{
+					"クリームパン ✖️1",
+					"クリームパン 茶色 ✖️2",
+				},
+				ImageURL: "https://storage.googleapis.com/pochirify-dev-server-assets/product_images/pic_prod_02%202.png",
+			},
+						{
+				ID:    "3",
+				Title: "お歳暮 ギフトセット2",
+				Price: 2800,
+				Contents: []string{
+					"クリームパン ✖️1",
+					"クリームパン 茶色 ✖️2",
+				},
+				ImageURL: "https://storage.googleapis.com/pochirify-dev-server-assets/product_images/pic_prod_02%202.png",
+			},
+		},
+	}, nil
+}
+
+// AllActiveVariantGroupIDs is the resolver for the AllActiveVariantGroupIDs field.
+func (r *queryResolver) AllActiveVariantGroupIDs(ctx context.Context) (*graphql1.AllActiveVariantGroupIDs, error) {
+	return &graphql1.AllActiveVariantGroupIDs{
+		Ids: []string{"1", "2"},
+	}, nil
+}
+
 // User is the resolver for the user field.
-func (r *todoResolver) User(ctx context.Context, obj *graqhql.Todo) (*graqhql.User, error) {
+func (r *todoResolver) User(ctx context.Context, obj *graphql1.Todo) (*graphql1.User, error) {
 	panic(fmt.Errorf("not implemented: User - user"))
 }
 
 // Todo is the resolver for the todo field.
-func (r *userResolver) Todo(ctx context.Context, obj *graqhql.User) (*graqhql.Todo, error) {
+func (r *userResolver) Todo(ctx context.Context, obj *graphql1.User) (*graphql1.Todo, error) {
 	panic(fmt.Errorf("not implemented: Todo - todo"))
 }
 

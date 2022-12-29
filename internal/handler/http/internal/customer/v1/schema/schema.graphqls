@@ -7,6 +7,11 @@ directive @goField(
   name: String
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
+# scalars
+scalar EmailAddress
+scalar PhoneNumber
+
+# general types
 type Todo {
   id: ID!
   text: String!
@@ -21,10 +26,65 @@ type User {
   todo: Todo @goField(forceResolver: true)
 }
 
+type Product {
+  id: ID!
+  title: String!
+  price: Int!
+  contents: [String!]!
+  imageURL: String!
+}
+
+type VariantGroup {
+  id: ID!
+  title: String!
+  imageURLs: [String!]!
+  deliveryTimeRange: DeliveryTimeRange!
+  faqImageURL: WebpPngImageURL!
+  descriptionImageURL: WebpPngImageURL!
+  badgeImageURL: String!
+}
+
+type DeliveryTimeRange {
+  # (ex) 12/23
+  from: String!
+  to: String!
+}
+
+type WebpPngImageURL {
+  webpURL: String!
+  pngURL: String!
+}
+
+# query types
+
+type VariantGroupDetail {
+  variantGroup: VariantGroup!
+  variants: [Product!]!
+}
+
+type AllActiveVariantGroupIDs {
+  ids: [String!]!
+}
+
+# type ProductDetail {
+#   product: Product!
+#   variants: [Product!]
+# }
+
+# type AllActiveProductIDs {
+#   ids: [String!]!
+# }
+
 type Query {
   todos: [Todo!]!
   users: [User!]!
+  variantGroupDetail(id: String!): VariantGroupDetail!
+  allActiveVariantGroupIDs: AllActiveVariantGroupIDs!
+  # productDetail(id: String!): ProductDetail!
+  # allActiveProductIDs: AllActiveProductIDs!
 }
+
+# input types
 
 input NewTodo {
   text: String!
@@ -36,8 +96,13 @@ input NewUser {
   name: String!
 }
 
-scalar EmailAddress
-scalar PhoneNumber
+input PaypayQRCodeInput {
+  emailAddress: EmailAddress!
+  phoneNumber: PhoneNumber!
+  address: AddressInput!
+  amount: Int!
+  orderDescription: String!
+}
 
 input AddressInput {
   zip: String!
@@ -46,13 +111,7 @@ input AddressInput {
   addressTwo: String
 }
 
-input PaypayQRCodeInput{
-  emailAddress: EmailAddress!
-  phoneNumber: PhoneNumber!
-  address: AddressInput!
-  amount: Int!
-  orderDescription: String!
-}
+# mutation types
 
 type createPaypayQRCodePayload {
   url: String!

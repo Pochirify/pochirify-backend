@@ -14,8 +14,8 @@ exec:
 
 # Where should any generated models go?
 model:
-  filename: internal/handler/http/internal/customer/v1/graqhql/graphql_gen.go
-  package: graqhql
+  filename: internal/handler/http/internal/customer/v1/graphql/graphql_gen.go
+  package: graphql
 
 # Where should the resolver implementations go?
 resolver:
