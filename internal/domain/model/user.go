@@ -9,6 +9,7 @@ import (
 var newUserError = errors.New("pochirify-backend-internal-domain-model: failed to create new user")
 
 type User struct {
+	// TODO: userIDはphoneNumberからつくる。住所は複数持つ
 	ID                 UserID
 	EmailAddressDigest string
 	PhoneNumberDigest  string

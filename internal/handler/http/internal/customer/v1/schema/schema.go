@@ -14,7 +14,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/graqhql"
+	graphql1 "github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/graphql"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -47,15 +47,34 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	AllActiveVariantGroupIDs struct {
+		Ids func(childComplexity int) int
+	}
+
+	DeliveryTimeRange struct {
+		From func(childComplexity int) int
+		To   func(childComplexity int) int
+	}
+
 	Mutation struct {
-		CreatePaypayQRCode func(childComplexity int, input graqhql.PaypayQRCodeInput) int
-		CreateTodo         func(childComplexity int, input graqhql.NewTodo) int
-		CreateUser         func(childComplexity int, input graqhql.NewUser) int
+		CreatePaypayQRCode func(childComplexity int, input graphql1.PaypayQRCodeInput) int
+		CreateTodo         func(childComplexity int, input graphql1.NewTodo) int
+		CreateUser         func(childComplexity int, input graphql1.NewUser) int
+	}
+
+	Product struct {
+		Contents func(childComplexity int) int
+		ID       func(childComplexity int) int
+		ImageURL func(childComplexity int) int
+		Price    func(childComplexity int) int
+		Title    func(childComplexity int) int
 	}
 
 	Query struct {
-		Todos func(childComplexity int) int
-		Users func(childComplexity int) int
+		AllActiveVariantGroupIDs func(childComplexity int) int
+		Todos                    func(childComplexity int) int
+		Users                    func(childComplexity int) int
+		VariantGroupDetail       func(childComplexity int, id string) int
 	}
 
 	Todo struct {
@@ -71,6 +90,26 @@ type ComplexityRoot struct {
 		Todo func(childComplexity int) int
 	}
 
+	VariantGroup struct {
+		BadgeImageURL       func(childComplexity int) int
+		DeliveryTimeRange   func(childComplexity int) int
+		DescriptionImageURL func(childComplexity int) int
+		FaqImageURL         func(childComplexity int) int
+		ID                  func(childComplexity int) int
+		ImageURLs           func(childComplexity int) int
+		Title               func(childComplexity int) int
+	}
+
+	VariantGroupDetail struct {
+		VariantGroup func(childComplexity int) int
+		Variants     func(childComplexity int) int
+	}
+
+	WebpPngImageURL struct {
+		PngURL  func(childComplexity int) int
+		WebpURL func(childComplexity int) int
+	}
+
 	CreatePaypayQRCodePayload struct {
 		DeepLink func(childComplexity int) int
 		URL      func(childComplexity int) int
@@ -78,19 +117,21 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateTodo(ctx context.Context, input graqhql.NewTodo) (*graqhql.Todo, error)
-	CreateUser(ctx context.Context, input graqhql.NewUser) (*graqhql.User, error)
-	CreatePaypayQRCode(ctx context.Context, input graqhql.PaypayQRCodeInput) (*graqhql.CreatePaypayQRCodePayload, error)
+	CreateTodo(ctx context.Context, input graphql1.NewTodo) (*graphql1.Todo, error)
+	CreateUser(ctx context.Context, input graphql1.NewUser) (*graphql1.User, error)
+	CreatePaypayQRCode(ctx context.Context, input graphql1.PaypayQRCodeInput) (*graphql1.CreatePaypayQRCodePayload, error)
 }
 type QueryResolver interface {
-	Todos(ctx context.Context) ([]*graqhql.Todo, error)
-	Users(ctx context.Context) ([]*graqhql.User, error)
+	Todos(ctx context.Context) ([]*graphql1.Todo, error)
+	Users(ctx context.Context) ([]*graphql1.User, error)
+	VariantGroupDetail(ctx context.Context, id string) (*graphql1.VariantGroupDetail, error)
+	AllActiveVariantGroupIDs(ctx context.Context) (*graphql1.AllActiveVariantGroupIDs, error)
 }
 type TodoResolver interface {
-	User(ctx context.Context, obj *graqhql.Todo) (*graqhql.User, error)
+	User(ctx context.Context, obj *graphql1.Todo) (*graphql1.User, error)
 }
 type UserResolver interface {
-	Todo(ctx context.Context, obj *graqhql.User) (*graqhql.Todo, error)
+	Todo(ctx context.Context, obj *graphql1.User) (*graphql1.Todo, error)
 }
 
 type executableSchema struct {
@@ -108,6 +149,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
+	case "AllActiveVariantGroupIDs.ids":
+		if e.complexity.AllActiveVariantGroupIDs.Ids == nil {
+			break
+		}
+
+		return e.complexity.AllActiveVariantGroupIDs.Ids(childComplexity), true
+
+	case "DeliveryTimeRange.from":
+		if e.complexity.DeliveryTimeRange.From == nil {
+			break
+		}
+
+		return e.complexity.DeliveryTimeRange.From(childComplexity), true
+
+	case "DeliveryTimeRange.to":
+		if e.complexity.DeliveryTimeRange.To == nil {
+			break
+		}
+
+		return e.complexity.DeliveryTimeRange.To(childComplexity), true
+
 	case "Mutation.createPaypayQRCode":
 		if e.complexity.Mutation.CreatePaypayQRCode == nil {
 			break
@@ -118,7 +180,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreatePaypayQRCode(childComplexity, args["input"].(graqhql.PaypayQRCodeInput)), true
+		return e.complexity.Mutation.CreatePaypayQRCode(childComplexity, args["input"].(graphql1.PaypayQRCodeInput)), true
 
 	case "Mutation.createTodo":
 		if e.complexity.Mutation.CreateTodo == nil {
@@ -130,7 +192,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateTodo(childComplexity, args["input"].(graqhql.NewTodo)), true
+		return e.complexity.Mutation.CreateTodo(childComplexity, args["input"].(graphql1.NewTodo)), true
 
 	case "Mutation.createUser":
 		if e.complexity.Mutation.CreateUser == nil {
@@ -142,7 +204,49 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(graqhql.NewUser)), true
+		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(graphql1.NewUser)), true
+
+	case "Product.contents":
+		if e.complexity.Product.Contents == nil {
+			break
+		}
+
+		return e.complexity.Product.Contents(childComplexity), true
+
+	case "Product.id":
+		if e.complexity.Product.ID == nil {
+			break
+		}
+
+		return e.complexity.Product.ID(childComplexity), true
+
+	case "Product.imageURL":
+		if e.complexity.Product.ImageURL == nil {
+			break
+		}
+
+		return e.complexity.Product.ImageURL(childComplexity), true
+
+	case "Product.price":
+		if e.complexity.Product.Price == nil {
+			break
+		}
+
+		return e.complexity.Product.Price(childComplexity), true
+
+	case "Product.title":
+		if e.complexity.Product.Title == nil {
+			break
+		}
+
+		return e.complexity.Product.Title(childComplexity), true
+
+	case "Query.allActiveVariantGroupIDs":
+		if e.complexity.Query.AllActiveVariantGroupIDs == nil {
+			break
+		}
+
+		return e.complexity.Query.AllActiveVariantGroupIDs(childComplexity), true
 
 	case "Query.todos":
 		if e.complexity.Query.Todos == nil {
@@ -157,6 +261,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Users(childComplexity), true
+
+	case "Query.variantGroupDetail":
+		if e.complexity.Query.VariantGroupDetail == nil {
+			break
+		}
+
+		args, err := ec.field_Query_variantGroupDetail_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.VariantGroupDetail(childComplexity, args["id"].(string)), true
 
 	case "Todo.done":
 		if e.complexity.Todo.Done == nil {
@@ -206,6 +322,83 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Todo(childComplexity), true
+
+	case "VariantGroup.badgeImageURL":
+		if e.complexity.VariantGroup.BadgeImageURL == nil {
+			break
+		}
+
+		return e.complexity.VariantGroup.BadgeImageURL(childComplexity), true
+
+	case "VariantGroup.deliveryTimeRange":
+		if e.complexity.VariantGroup.DeliveryTimeRange == nil {
+			break
+		}
+
+		return e.complexity.VariantGroup.DeliveryTimeRange(childComplexity), true
+
+	case "VariantGroup.descriptionImageURL":
+		if e.complexity.VariantGroup.DescriptionImageURL == nil {
+			break
+		}
+
+		return e.complexity.VariantGroup.DescriptionImageURL(childComplexity), true
+
+	case "VariantGroup.faqImageURL":
+		if e.complexity.VariantGroup.FaqImageURL == nil {
+			break
+		}
+
+		return e.complexity.VariantGroup.FaqImageURL(childComplexity), true
+
+	case "VariantGroup.id":
+		if e.complexity.VariantGroup.ID == nil {
+			break
+		}
+
+		return e.complexity.VariantGroup.ID(childComplexity), true
+
+	case "VariantGroup.imageURLs":
+		if e.complexity.VariantGroup.ImageURLs == nil {
+			break
+		}
+
+		return e.complexity.VariantGroup.ImageURLs(childComplexity), true
+
+	case "VariantGroup.title":
+		if e.complexity.VariantGroup.Title == nil {
+			break
+		}
+
+		return e.complexity.VariantGroup.Title(childComplexity), true
+
+	case "VariantGroupDetail.variantGroup":
+		if e.complexity.VariantGroupDetail.VariantGroup == nil {
+			break
+		}
+
+		return e.complexity.VariantGroupDetail.VariantGroup(childComplexity), true
+
+	case "VariantGroupDetail.variants":
+		if e.complexity.VariantGroupDetail.Variants == nil {
+			break
+		}
+
+		return e.complexity.VariantGroupDetail.Variants(childComplexity), true
+
+	case "WebpPngImageURL.pngURL":
+		if e.complexity.WebpPngImageURL.PngURL == nil {
+			break
+		}
+
+		return e.complexity.WebpPngImageURL.PngURL(childComplexity), true
+
+	case "WebpPngImageURL.webpURL":
+		if e.complexity.WebpPngImageURL.WebpURL == nil {
+			break
+		}
+
+		return e.complexity.WebpPngImageURL.WebpURL(childComplexity), true
 
 	case "createPaypayQRCodePayload.deepLink":
 		if e.complexity.CreatePaypayQRCodePayload.DeepLink == nil {
@@ -315,10 +508,10 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_createPaypayQRCode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 graqhql.PaypayQRCodeInput
+	var arg0 graphql1.PaypayQRCodeInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNPaypayQRCodeInput2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐPaypayQRCodeInput(ctx, tmp)
+		arg0, err = ec.unmarshalNPaypayQRCodeInput2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐPaypayQRCodeInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -330,10 +523,10 @@ func (ec *executionContext) field_Mutation_createPaypayQRCode_args(ctx context.C
 func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 graqhql.NewTodo
+	var arg0 graphql1.NewTodo
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNNewTodo2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐNewTodo(ctx, tmp)
+		arg0, err = ec.unmarshalNNewTodo2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐNewTodo(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -345,10 +538,10 @@ func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 graqhql.NewUser
+	var arg0 graphql1.NewUser
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNNewUser2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐNewUser(ctx, tmp)
+		arg0, err = ec.unmarshalNNewUser2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐNewUser(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -369,6 +562,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_variantGroupDetail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -410,6 +618,138 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _AllActiveVariantGroupIDs_ids(ctx context.Context, field graphql.CollectedField, obj *graphql1.AllActiveVariantGroupIDs) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AllActiveVariantGroupIDs_ids(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ids, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AllActiveVariantGroupIDs_ids(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AllActiveVariantGroupIDs",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeliveryTimeRange_from(ctx context.Context, field graphql.CollectedField, obj *graphql1.DeliveryTimeRange) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeliveryTimeRange_from(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.From, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeliveryTimeRange_from(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeliveryTimeRange",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeliveryTimeRange_to(ctx context.Context, field graphql.CollectedField, obj *graphql1.DeliveryTimeRange) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeliveryTimeRange_to(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.To, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeliveryTimeRange_to(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeliveryTimeRange",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_createTodo(ctx, field)
 	if err != nil {
@@ -424,7 +764,7 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateTodo(rctx, fc.Args["input"].(graqhql.NewTodo))
+		return ec.resolvers.Mutation().CreateTodo(rctx, fc.Args["input"].(graphql1.NewTodo))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -436,9 +776,9 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*graqhql.Todo)
+	res := resTmp.(*graphql1.Todo)
 	fc.Result = res
-	return ec.marshalNTodo2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐTodo(ctx, field.Selections, res)
+	return ec.marshalNTodo2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createTodo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -489,7 +829,7 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateUser(rctx, fc.Args["input"].(graqhql.NewUser))
+		return ec.resolvers.Mutation().CreateUser(rctx, fc.Args["input"].(graphql1.NewUser))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -501,9 +841,9 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*graqhql.User)
+	res := resTmp.(*graphql1.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -552,7 +892,7 @@ func (ec *executionContext) _Mutation_createPaypayQRCode(ctx context.Context, fi
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreatePaypayQRCode(rctx, fc.Args["input"].(graqhql.PaypayQRCodeInput))
+		return ec.resolvers.Mutation().CreatePaypayQRCode(rctx, fc.Args["input"].(graphql1.PaypayQRCodeInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -564,9 +904,9 @@ func (ec *executionContext) _Mutation_createPaypayQRCode(ctx context.Context, fi
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*graqhql.CreatePaypayQRCodePayload)
+	res := resTmp.(*graphql1.CreatePaypayQRCodePayload)
 	fc.Result = res
-	return ec.marshalNcreatePaypayQRCodePayload2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐCreatePaypayQRCodePayload(ctx, field.Selections, res)
+	return ec.marshalNcreatePaypayQRCodePayload2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreatePaypayQRCodePayload(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createPaypayQRCode(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -599,6 +939,226 @@ func (ec *executionContext) fieldContext_Mutation_createPaypayQRCode(ctx context
 	return fc, nil
 }
 
+func (ec *executionContext) _Product_id(ctx context.Context, field graphql.CollectedField, obj *graphql1.Product) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Product_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Product_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Product",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Product_title(ctx context.Context, field graphql.CollectedField, obj *graphql1.Product) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Product_title(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Product_title(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Product",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Product_price(ctx context.Context, field graphql.CollectedField, obj *graphql1.Product) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Product_price(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Price, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Product_price(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Product",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Product_contents(ctx context.Context, field graphql.CollectedField, obj *graphql1.Product) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Product_contents(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Contents, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Product_contents(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Product",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Product_imageURL(ctx context.Context, field graphql.CollectedField, obj *graphql1.Product) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Product_imageURL(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ImageURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Product_imageURL(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Product",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_todos(ctx, field)
 	if err != nil {
@@ -625,9 +1185,9 @@ func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*graqhql.Todo)
+	res := resTmp.([]*graphql1.Todo)
 	fc.Result = res
-	return ec.marshalNTodo2ᚕᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐTodoᚄ(ctx, field.Selections, res)
+	return ec.marshalNTodo2ᚕᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐTodoᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_todos(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -679,9 +1239,9 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*graqhql.User)
+	res := resTmp.([]*graphql1.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -700,6 +1260,115 @@ func (ec *executionContext) fieldContext_Query_users(ctx context.Context, field 
 				return ec.fieldContext_User_todo(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_variantGroupDetail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_variantGroupDetail(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().VariantGroupDetail(rctx, fc.Args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphql1.VariantGroupDetail)
+	fc.Result = res
+	return ec.marshalNVariantGroupDetail2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐVariantGroupDetail(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_variantGroupDetail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "variantGroup":
+				return ec.fieldContext_VariantGroupDetail_variantGroup(ctx, field)
+			case "variants":
+				return ec.fieldContext_VariantGroupDetail_variants(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type VariantGroupDetail", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_variantGroupDetail_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_allActiveVariantGroupIDs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_allActiveVariantGroupIDs(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().AllActiveVariantGroupIDs(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphql1.AllActiveVariantGroupIDs)
+	fc.Result = res
+	return ec.marshalNAllActiveVariantGroupIDs2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐAllActiveVariantGroupIDs(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_allActiveVariantGroupIDs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "ids":
+				return ec.fieldContext_AllActiveVariantGroupIDs_ids(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AllActiveVariantGroupIDs", field.Name)
 		},
 	}
 	return fc, nil
@@ -834,7 +1503,7 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.CollectedField, obj *graqhql.Todo) (ret graphql.Marshaler) {
+func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.CollectedField, obj *graphql1.Todo) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Todo_id(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -878,7 +1547,7 @@ func (ec *executionContext) fieldContext_Todo_id(ctx context.Context, field grap
 	return fc, nil
 }
 
-func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.CollectedField, obj *graqhql.Todo) (ret graphql.Marshaler) {
+func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.CollectedField, obj *graphql1.Todo) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Todo_text(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -922,7 +1591,7 @@ func (ec *executionContext) fieldContext_Todo_text(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.CollectedField, obj *graqhql.Todo) (ret graphql.Marshaler) {
+func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.CollectedField, obj *graphql1.Todo) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Todo_done(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -966,7 +1635,7 @@ func (ec *executionContext) fieldContext_Todo_done(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Todo_user(ctx context.Context, field graphql.CollectedField, obj *graqhql.Todo) (ret graphql.Marshaler) {
+func (ec *executionContext) _Todo_user(ctx context.Context, field graphql.CollectedField, obj *graphql1.Todo) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Todo_user(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -992,9 +1661,9 @@ func (ec *executionContext) _Todo_user(ctx context.Context, field graphql.Collec
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*graqhql.User)
+	res := resTmp.(*graphql1.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Todo_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1018,7 +1687,7 @@ func (ec *executionContext) fieldContext_Todo_user(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *graqhql.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *graphql1.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_id(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1062,7 +1731,7 @@ func (ec *executionContext) fieldContext_User_id(ctx context.Context, field grap
 	return fc, nil
 }
 
-func (ec *executionContext) _User_name(ctx context.Context, field graphql.CollectedField, obj *graqhql.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_name(ctx context.Context, field graphql.CollectedField, obj *graphql1.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_name(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1106,7 +1775,7 @@ func (ec *executionContext) fieldContext_User_name(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _User_todo(ctx context.Context, field graphql.CollectedField, obj *graqhql.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_todo(ctx context.Context, field graphql.CollectedField, obj *graphql1.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_todo(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1129,9 +1798,9 @@ func (ec *executionContext) _User_todo(ctx context.Context, field graphql.Collec
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*graqhql.Todo)
+	res := resTmp.(*graphql1.Todo)
 	fc.Result = res
-	return ec.marshalOTodo2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐTodo(ctx, field.Selections, res)
+	return ec.marshalOTodo2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_todo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1152,6 +1821,536 @@ func (ec *executionContext) fieldContext_User_todo(ctx context.Context, field gr
 				return ec.fieldContext_Todo_user(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Todo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VariantGroup_id(ctx context.Context, field graphql.CollectedField, obj *graphql1.VariantGroup) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VariantGroup_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VariantGroup_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VariantGroup",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VariantGroup_title(ctx context.Context, field graphql.CollectedField, obj *graphql1.VariantGroup) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VariantGroup_title(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VariantGroup_title(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VariantGroup",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VariantGroup_imageURLs(ctx context.Context, field graphql.CollectedField, obj *graphql1.VariantGroup) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VariantGroup_imageURLs(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ImageURLs, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VariantGroup_imageURLs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VariantGroup",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VariantGroup_deliveryTimeRange(ctx context.Context, field graphql.CollectedField, obj *graphql1.VariantGroup) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VariantGroup_deliveryTimeRange(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeliveryTimeRange, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphql1.DeliveryTimeRange)
+	fc.Result = res
+	return ec.marshalNDeliveryTimeRange2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐDeliveryTimeRange(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VariantGroup_deliveryTimeRange(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VariantGroup",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "from":
+				return ec.fieldContext_DeliveryTimeRange_from(ctx, field)
+			case "to":
+				return ec.fieldContext_DeliveryTimeRange_to(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DeliveryTimeRange", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VariantGroup_faqImageURL(ctx context.Context, field graphql.CollectedField, obj *graphql1.VariantGroup) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VariantGroup_faqImageURL(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FaqImageURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphql1.WebpPngImageURL)
+	fc.Result = res
+	return ec.marshalNWebpPngImageURL2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐWebpPngImageURL(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VariantGroup_faqImageURL(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VariantGroup",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "webpURL":
+				return ec.fieldContext_WebpPngImageURL_webpURL(ctx, field)
+			case "pngURL":
+				return ec.fieldContext_WebpPngImageURL_pngURL(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type WebpPngImageURL", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VariantGroup_descriptionImageURL(ctx context.Context, field graphql.CollectedField, obj *graphql1.VariantGroup) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VariantGroup_descriptionImageURL(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DescriptionImageURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphql1.WebpPngImageURL)
+	fc.Result = res
+	return ec.marshalNWebpPngImageURL2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐWebpPngImageURL(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VariantGroup_descriptionImageURL(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VariantGroup",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "webpURL":
+				return ec.fieldContext_WebpPngImageURL_webpURL(ctx, field)
+			case "pngURL":
+				return ec.fieldContext_WebpPngImageURL_pngURL(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type WebpPngImageURL", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VariantGroup_badgeImageURL(ctx context.Context, field graphql.CollectedField, obj *graphql1.VariantGroup) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VariantGroup_badgeImageURL(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BadgeImageURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VariantGroup_badgeImageURL(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VariantGroup",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VariantGroupDetail_variantGroup(ctx context.Context, field graphql.CollectedField, obj *graphql1.VariantGroupDetail) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VariantGroupDetail_variantGroup(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.VariantGroup, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphql1.VariantGroup)
+	fc.Result = res
+	return ec.marshalNVariantGroup2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐVariantGroup(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VariantGroupDetail_variantGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VariantGroupDetail",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_VariantGroup_id(ctx, field)
+			case "title":
+				return ec.fieldContext_VariantGroup_title(ctx, field)
+			case "imageURLs":
+				return ec.fieldContext_VariantGroup_imageURLs(ctx, field)
+			case "deliveryTimeRange":
+				return ec.fieldContext_VariantGroup_deliveryTimeRange(ctx, field)
+			case "faqImageURL":
+				return ec.fieldContext_VariantGroup_faqImageURL(ctx, field)
+			case "descriptionImageURL":
+				return ec.fieldContext_VariantGroup_descriptionImageURL(ctx, field)
+			case "badgeImageURL":
+				return ec.fieldContext_VariantGroup_badgeImageURL(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type VariantGroup", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VariantGroupDetail_variants(ctx context.Context, field graphql.CollectedField, obj *graphql1.VariantGroupDetail) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VariantGroupDetail_variants(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Variants, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*graphql1.Product)
+	fc.Result = res
+	return ec.marshalNProduct2ᚕᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐProductᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VariantGroupDetail_variants(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VariantGroupDetail",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Product_id(ctx, field)
+			case "title":
+				return ec.fieldContext_Product_title(ctx, field)
+			case "price":
+				return ec.fieldContext_Product_price(ctx, field)
+			case "contents":
+				return ec.fieldContext_Product_contents(ctx, field)
+			case "imageURL":
+				return ec.fieldContext_Product_imageURL(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Product", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _WebpPngImageURL_webpURL(ctx context.Context, field graphql.CollectedField, obj *graphql1.WebpPngImageURL) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_WebpPngImageURL_webpURL(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.WebpURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_WebpPngImageURL_webpURL(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "WebpPngImageURL",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _WebpPngImageURL_pngURL(ctx context.Context, field graphql.CollectedField, obj *graphql1.WebpPngImageURL) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_WebpPngImageURL_pngURL(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PngURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_WebpPngImageURL_pngURL(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "WebpPngImageURL",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2926,7 +4125,7 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _createPaypayQRCodePayload_url(ctx context.Context, field graphql.CollectedField, obj *graqhql.CreatePaypayQRCodePayload) (ret graphql.Marshaler) {
+func (ec *executionContext) _createPaypayQRCodePayload_url(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreatePaypayQRCodePayload) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_createPaypayQRCodePayload_url(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2970,7 +4169,7 @@ func (ec *executionContext) fieldContext_createPaypayQRCodePayload_url(ctx conte
 	return fc, nil
 }
 
-func (ec *executionContext) _createPaypayQRCodePayload_deepLink(ctx context.Context, field graphql.CollectedField, obj *graqhql.CreatePaypayQRCodePayload) (ret graphql.Marshaler) {
+func (ec *executionContext) _createPaypayQRCodePayload_deepLink(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreatePaypayQRCodePayload) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_createPaypayQRCodePayload_deepLink(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3018,8 +4217,8 @@ func (ec *executionContext) fieldContext_createPaypayQRCodePayload_deepLink(ctx 
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputAddressInput(ctx context.Context, obj interface{}) (graqhql.AddressInput, error) {
-	var it graqhql.AddressInput
+func (ec *executionContext) unmarshalInputAddressInput(ctx context.Context, obj interface{}) (graphql1.AddressInput, error) {
+	var it graphql1.AddressInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -3070,8 +4269,8 @@ func (ec *executionContext) unmarshalInputAddressInput(ctx context.Context, obj 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj interface{}) (graqhql.NewTodo, error) {
-	var it graqhql.NewTodo
+func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj interface{}) (graphql1.NewTodo, error) {
+	var it graphql1.NewTodo
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -3106,8 +4305,8 @@ func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj inter
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj interface{}) (graqhql.NewUser, error) {
-	var it graqhql.NewUser
+func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj interface{}) (graphql1.NewUser, error) {
+	var it graphql1.NewUser
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -3142,8 +4341,8 @@ func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj inter
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPaypayQRCodeInput(ctx context.Context, obj interface{}) (graqhql.PaypayQRCodeInput, error) {
-	var it graqhql.PaypayQRCodeInput
+func (ec *executionContext) unmarshalInputPaypayQRCodeInput(ctx context.Context, obj interface{}) (graphql1.PaypayQRCodeInput, error) {
+	var it graphql1.PaypayQRCodeInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -3176,7 +4375,7 @@ func (ec *executionContext) unmarshalInputPaypayQRCodeInput(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("address"))
-			it.Address, err = ec.unmarshalNAddressInput2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐAddressInput(ctx, v)
+			it.Address, err = ec.unmarshalNAddressInput2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐAddressInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3209,6 +4408,69 @@ func (ec *executionContext) unmarshalInputPaypayQRCodeInput(ctx context.Context,
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var allActiveVariantGroupIDsImplementors = []string{"AllActiveVariantGroupIDs"}
+
+func (ec *executionContext) _AllActiveVariantGroupIDs(ctx context.Context, sel ast.SelectionSet, obj *graphql1.AllActiveVariantGroupIDs) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, allActiveVariantGroupIDsImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AllActiveVariantGroupIDs")
+		case "ids":
+
+			out.Values[i] = ec._AllActiveVariantGroupIDs_ids(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var deliveryTimeRangeImplementors = []string{"DeliveryTimeRange"}
+
+func (ec *executionContext) _DeliveryTimeRange(ctx context.Context, sel ast.SelectionSet, obj *graphql1.DeliveryTimeRange) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, deliveryTimeRangeImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DeliveryTimeRange")
+		case "from":
+
+			out.Values[i] = ec._DeliveryTimeRange_from(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "to":
+
+			out.Values[i] = ec._DeliveryTimeRange_to(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
 
 var mutationImplementors = []string{"Mutation"}
 
@@ -3252,6 +4514,62 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createPaypayQRCode(ctx, field)
 			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var productImplementors = []string{"Product"}
+
+func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, obj *graphql1.Product) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, productImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Product")
+		case "id":
+
+			out.Values[i] = ec._Product_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "title":
+
+			out.Values[i] = ec._Product_title(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "price":
+
+			out.Values[i] = ec._Product_price(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "contents":
+
+			out.Values[i] = ec._Product_contents(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "imageURL":
+
+			out.Values[i] = ec._Product_imageURL(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -3332,6 +4650,52 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
+		case "variantGroupDetail":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_variantGroupDetail(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "allActiveVariantGroupIDs":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_allActiveVariantGroupIDs(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
 		case "__type":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -3357,7 +4721,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 
 var todoImplementors = []string{"Todo"}
 
-func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj *graqhql.Todo) graphql.Marshaler {
+func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj *graphql1.Todo) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, todoImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
@@ -3419,7 +4783,7 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 
 var userImplementors = []string{"User"}
 
-func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *graqhql.User) graphql.Marshaler {
+func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *graphql1.User) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, userImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
@@ -3458,6 +4822,146 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				return innerFunc(ctx)
 
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var variantGroupImplementors = []string{"VariantGroup"}
+
+func (ec *executionContext) _VariantGroup(ctx context.Context, sel ast.SelectionSet, obj *graphql1.VariantGroup) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, variantGroupImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VariantGroup")
+		case "id":
+
+			out.Values[i] = ec._VariantGroup_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "title":
+
+			out.Values[i] = ec._VariantGroup_title(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "imageURLs":
+
+			out.Values[i] = ec._VariantGroup_imageURLs(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deliveryTimeRange":
+
+			out.Values[i] = ec._VariantGroup_deliveryTimeRange(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "faqImageURL":
+
+			out.Values[i] = ec._VariantGroup_faqImageURL(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "descriptionImageURL":
+
+			out.Values[i] = ec._VariantGroup_descriptionImageURL(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "badgeImageURL":
+
+			out.Values[i] = ec._VariantGroup_badgeImageURL(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var variantGroupDetailImplementors = []string{"VariantGroupDetail"}
+
+func (ec *executionContext) _VariantGroupDetail(ctx context.Context, sel ast.SelectionSet, obj *graphql1.VariantGroupDetail) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, variantGroupDetailImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VariantGroupDetail")
+		case "variantGroup":
+
+			out.Values[i] = ec._VariantGroupDetail_variantGroup(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "variants":
+
+			out.Values[i] = ec._VariantGroupDetail_variants(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var webpPngImageURLImplementors = []string{"WebpPngImageURL"}
+
+func (ec *executionContext) _WebpPngImageURL(ctx context.Context, sel ast.SelectionSet, obj *graphql1.WebpPngImageURL) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, webpPngImageURLImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("WebpPngImageURL")
+		case "webpURL":
+
+			out.Values[i] = ec._WebpPngImageURL_webpURL(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "pngURL":
+
+			out.Values[i] = ec._WebpPngImageURL_pngURL(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3785,7 +5289,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 var createPaypayQRCodePayloadImplementors = []string{"createPaypayQRCodePayload"}
 
-func (ec *executionContext) _createPaypayQRCodePayload(ctx context.Context, sel ast.SelectionSet, obj *graqhql.CreatePaypayQRCodePayload) graphql.Marshaler {
+func (ec *executionContext) _createPaypayQRCodePayload(ctx context.Context, sel ast.SelectionSet, obj *graphql1.CreatePaypayQRCodePayload) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, createPaypayQRCodePayloadImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
@@ -3822,9 +5326,23 @@ func (ec *executionContext) _createPaypayQRCodePayload(ctx context.Context, sel 
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNAddressInput2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐAddressInput(ctx context.Context, v interface{}) (*graqhql.AddressInput, error) {
+func (ec *executionContext) unmarshalNAddressInput2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐAddressInput(ctx context.Context, v interface{}) (*graphql1.AddressInput, error) {
 	res, err := ec.unmarshalInputAddressInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNAllActiveVariantGroupIDs2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐAllActiveVariantGroupIDs(ctx context.Context, sel ast.SelectionSet, v graphql1.AllActiveVariantGroupIDs) graphql.Marshaler {
+	return ec._AllActiveVariantGroupIDs(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNAllActiveVariantGroupIDs2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐAllActiveVariantGroupIDs(ctx context.Context, sel ast.SelectionSet, v *graphql1.AllActiveVariantGroupIDs) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._AllActiveVariantGroupIDs(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
@@ -3840,6 +5358,16 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNDeliveryTimeRange2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐDeliveryTimeRange(ctx context.Context, sel ast.SelectionSet, v *graphql1.DeliveryTimeRange) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DeliveryTimeRange(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNEmailAddress2string(ctx context.Context, v interface{}) (string, error) {
@@ -3887,17 +5415,17 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) unmarshalNNewTodo2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐNewTodo(ctx context.Context, v interface{}) (graqhql.NewTodo, error) {
+func (ec *executionContext) unmarshalNNewTodo2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐNewTodo(ctx context.Context, v interface{}) (graphql1.NewTodo, error) {
 	res, err := ec.unmarshalInputNewTodo(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNNewUser2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐNewUser(ctx context.Context, v interface{}) (graqhql.NewUser, error) {
+func (ec *executionContext) unmarshalNNewUser2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐNewUser(ctx context.Context, v interface{}) (graphql1.NewUser, error) {
 	res, err := ec.unmarshalInputNewUser(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPaypayQRCodeInput2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐPaypayQRCodeInput(ctx context.Context, v interface{}) (graqhql.PaypayQRCodeInput, error) {
+func (ec *executionContext) unmarshalNPaypayQRCodeInput2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐPaypayQRCodeInput(ctx context.Context, v interface{}) (graphql1.PaypayQRCodeInput, error) {
 	res, err := ec.unmarshalInputPaypayQRCodeInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -3917,6 +5445,60 @@ func (ec *executionContext) marshalNPhoneNumber2string(ctx context.Context, sel 
 	return res
 }
 
+func (ec *executionContext) marshalNProduct2ᚕᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐProductᚄ(ctx context.Context, sel ast.SelectionSet, v []*graphql1.Product) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNProduct2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐProduct(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNProduct2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐProduct(ctx context.Context, sel ast.SelectionSet, v *graphql1.Product) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Product(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3932,11 +5514,43 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNTodo2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐTodo(ctx context.Context, sel ast.SelectionSet, v graqhql.Todo) graphql.Marshaler {
+func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNTodo2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐTodo(ctx context.Context, sel ast.SelectionSet, v graphql1.Todo) graphql.Marshaler {
 	return ec._Todo(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐTodoᚄ(ctx context.Context, sel ast.SelectionSet, v []*graqhql.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐTodoᚄ(ctx context.Context, sel ast.SelectionSet, v []*graphql1.Todo) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3960,7 +5574,7 @@ func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋPochirifyᚋpochir
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNTodo2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐTodo(ctx, sel, v[i])
+			ret[i] = ec.marshalNTodo2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐTodo(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3980,7 +5594,7 @@ func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋPochirifyᚋpochir
 	return ret
 }
 
-func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐTodo(ctx context.Context, sel ast.SelectionSet, v *graqhql.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐTodo(ctx context.Context, sel ast.SelectionSet, v *graphql1.Todo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -3990,11 +5604,11 @@ func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋPochirifyᚋpochirify
 	return ec._Todo(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐUser(ctx context.Context, sel ast.SelectionSet, v graqhql.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐUser(ctx context.Context, sel ast.SelectionSet, v graphql1.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*graqhql.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*graphql1.User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4018,7 +5632,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋPochirifyᚋpochir
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4038,7 +5652,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋPochirifyᚋpochir
 	return ret
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐUser(ctx context.Context, sel ast.SelectionSet, v *graqhql.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐUser(ctx context.Context, sel ast.SelectionSet, v *graphql1.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4046,6 +5660,40 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋPochirifyᚋpochirify
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNVariantGroup2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐVariantGroup(ctx context.Context, sel ast.SelectionSet, v *graphql1.VariantGroup) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._VariantGroup(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNVariantGroupDetail2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐVariantGroupDetail(ctx context.Context, sel ast.SelectionSet, v graphql1.VariantGroupDetail) graphql.Marshaler {
+	return ec._VariantGroupDetail(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNVariantGroupDetail2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐVariantGroupDetail(ctx context.Context, sel ast.SelectionSet, v *graphql1.VariantGroupDetail) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._VariantGroupDetail(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNWebpPngImageURL2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐWebpPngImageURL(ctx context.Context, sel ast.SelectionSet, v *graphql1.WebpPngImageURL) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._WebpPngImageURL(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -4301,11 +5949,11 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalNcreatePaypayQRCodePayload2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐCreatePaypayQRCodePayload(ctx context.Context, sel ast.SelectionSet, v graqhql.CreatePaypayQRCodePayload) graphql.Marshaler {
+func (ec *executionContext) marshalNcreatePaypayQRCodePayload2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreatePaypayQRCodePayload(ctx context.Context, sel ast.SelectionSet, v graphql1.CreatePaypayQRCodePayload) graphql.Marshaler {
 	return ec._createPaypayQRCodePayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNcreatePaypayQRCodePayload2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐCreatePaypayQRCodePayload(ctx context.Context, sel ast.SelectionSet, v *graqhql.CreatePaypayQRCodePayload) graphql.Marshaler {
+func (ec *executionContext) marshalNcreatePaypayQRCodePayload2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreatePaypayQRCodePayload(ctx context.Context, sel ast.SelectionSet, v *graphql1.CreatePaypayQRCodePayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4373,7 +6021,7 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOTodo2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraqhqlᚐTodo(ctx context.Context, sel ast.SelectionSet, v *graqhql.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalOTodo2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐTodo(ctx context.Context, sel ast.SelectionSet, v *graphql1.Todo) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
