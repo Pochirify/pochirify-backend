@@ -5,28 +5,11 @@ package resolver
 
 import (
 	"context"
-	"fmt"
 
 	graphql1 "github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/graphql"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/schema"
 	"github.com/Pochirify/pochirify-backend/internal/usecase"
-	"github.com/google/uuid"
 )
-
-// CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input graphql1.NewTodo) (*graphql1.Todo, error) {
-	todo := graphql1.Todo{
-		ID:   uuid.NewString(),
-		Text: input.Text,
-		Done: false,
-	}
-	return &todo, nil
-}
-
-// CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, input graphql1.NewUser) (*graphql1.User, error) {
-	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
-}
 
 // CreatePaypayQRCode is the resolver for the createPaypayQRCode field.
 func (r *mutationResolver) CreatePaypayQRCode(ctx context.Context, input graphql1.PaypayQRCodeInput) (*graphql1.CreatePaypayQRCodePayload, error) {
@@ -49,18 +32,6 @@ func (r *mutationResolver) CreatePaypayQRCode(ctx context.Context, input graphql
 		URL:      output.QRCode.QRCodeUrl,
 		DeepLink: output.QRCode.QRCodeDeepLink,
 	}, nil
-}
-
-// Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*graphql1.Todo, error) {
-	return []*graphql1.Todo{
-		{Text: "text"},
-	}, nil
-}
-
-// Users is the resolver for the users field.
-func (r *queryResolver) Users(ctx context.Context) ([]*graphql1.User, error) {
-	panic(fmt.Errorf("not implemented: Users - users"))
 }
 
 // VariantGroupDetail is the resolver for the variantGroupDetail field.
@@ -108,7 +79,7 @@ func (r *queryResolver) VariantGroupDetail(ctx context.Context, id string) (*gra
 				},
 				ImageURL: "https://storage.googleapis.com/pochirify-dev-server-assets/product_images/pic_prod_02%202.png",
 			},
-						{
+			{
 				ID:    "3",
 				Title: "お歳暮 ギフトセット2",
 				Price: 2800,
@@ -129,29 +100,11 @@ func (r *queryResolver) AllActiveVariantGroupIDs(ctx context.Context) (*graphql1
 	}, nil
 }
 
-// User is the resolver for the user field.
-func (r *todoResolver) User(ctx context.Context, obj *graphql1.Todo) (*graphql1.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
-}
-
-// Todo is the resolver for the todo field.
-func (r *userResolver) Todo(ctx context.Context, obj *graphql1.User) (*graphql1.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todo - todo"))
-}
-
 // Mutation returns schema.MutationResolver implementation.
 func (r *Resolver) Mutation() schema.MutationResolver { return &mutationResolver{r} }
 
 // Query returns schema.QueryResolver implementation.
 func (r *Resolver) Query() schema.QueryResolver { return &queryResolver{r} }
 
-// Todo returns schema.TodoResolver implementation.
-func (r *Resolver) Todo() schema.TodoResolver { return &todoResolver{r} }
-
-// User returns schema.UserResolver implementation.
-func (r *Resolver) User() schema.UserResolver { return &userResolver{r} }
-
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-type todoResolver struct{ *Resolver }
-type userResolver struct{ *Resolver }

@@ -11,21 +11,6 @@ directive @goField(
 scalar EmailAddress
 scalar PhoneNumber
 
-# general types
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-  # userはこの上のtodo typeのresolverを使用する（query resolverではなく）ことを強制。Todo resolverではuserを取らないべき。そうすることで、欲しいときだけuserを読んで、無駄なdbアクセスを減らすことができる。
-  user: User! @goField(forceResolver: true)
-}
-
-type User {
-  id: ID!
-  name: String!
-  todo: Todo @goField(forceResolver: true)
-}
-
 type Product {
   id: ID!
   title: String!
@@ -76,24 +61,10 @@ type AllActiveVariantGroupIDs {
 # }
 
 type Query {
-  todos: [Todo!]!
-  users: [User!]!
   variantGroupDetail(id: String!): VariantGroupDetail!
   allActiveVariantGroupIDs: AllActiveVariantGroupIDs!
   # productDetail(id: String!): ProductDetail!
   # allActiveProductIDs: AllActiveProductIDs!
-}
-
-# input types
-
-input NewTodo {
-  text: String!
-  userId: String!
-}
-
-input NewUser {
-  id: ID
-  name: String!
 }
 
 input PaypayQRCodeInput {
@@ -119,7 +90,5 @@ type createPaypayQRCodePayload {
 }
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
-  createUser(input: NewUser!): User!
   createPaypayQRCode(input: PaypayQRCodeInput!): createPaypayQRCodePayload!
 }
