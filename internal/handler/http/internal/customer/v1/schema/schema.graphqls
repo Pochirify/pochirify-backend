@@ -8,8 +8,12 @@ directive @goField(
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 # scalars
-scalar EmailAddress
-scalar PhoneNumber
+enum PaymentMethod {
+  CARD
+  PAYPAY
+  APPLE_PAY
+  GOOGLE_PAY
+}
 
 type Product {
   id: ID!
@@ -41,7 +45,6 @@ type WebpPngImageURL {
 }
 
 # query types
-
 type VariantGroupDetail {
   variantGroup: VariantGroup!
   variants: [Product!]!
@@ -51,15 +54,6 @@ type AllActiveVariantGroupIDs {
   ids: [String!]!
 }
 
-# type ProductDetail {
-#   product: Product!
-#   variants: [Product!]
-# }
-
-# type AllActiveProductIDs {
-#   ids: [String!]!
-# }
-
 type Query {
   variantGroupDetail(id: String!): VariantGroupDetail!
   allActiveVariantGroupIDs: AllActiveVariantGroupIDs!
@@ -67,28 +61,31 @@ type Query {
   # allActiveProductIDs: AllActiveProductIDs!
 }
 
-input PaypayQRCodeInput {
-  emailAddress: EmailAddress!
-  phoneNumber: PhoneNumber!
-  address: AddressInput!
-  amount: Int!
-  orderDescription: String!
-}
+# input
+input createOrderInput {
+  productID: String!
+  paymentMethod: PaymentMethod!
+  userID: String
+  phoneNumber: String!
 
-input AddressInput {
-  zip: String!
+  addressID: String
+  emailAddress: String!
+  zipCode: Int!
   prefecture: String!
-  addressOne: String!
-  addressTwo: String
+  city: String!
+  streetAddress: String!
+  building: String
+  lastName: String!
+  firstName: String!
 }
 
-# mutation types
-
-type createPaypayQRCodePayload {
-  url: String!
-  deepLink: String!
+# mutation payload
+type createOrderPayload {
+  orderID: String!
+  price: Int!
+  url: String
 }
 
 type Mutation {
-  createPaypayQRCode(input: PaypayQRCodeInput!): createPaypayQRCodePayload!
+  createOrder(input: createOrderInput!): createOrderPayload
 }

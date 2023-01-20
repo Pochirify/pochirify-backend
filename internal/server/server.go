@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Pochirify/pochirify-backend/internal/domain/settlement/paypay"
+	"github.com/Pochirify/pochirify-backend/internal/domain/payment/paypay"
 	"github.com/Pochirify/pochirify-backend/internal/handler/db/spanner"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http"
 	"github.com/Pochirify/pochirify-backend/internal/handler/logger/json"

@@ -55,7 +55,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreatePaypayQRCode func(childComplexity int, input graphql1.PaypayQRCodeInput) int
+		CreateOrder func(childComplexity int, input graphql1.CreateOrderInput) int
 	}
 
 	Product struct {
@@ -91,14 +91,15 @@ type ComplexityRoot struct {
 		WebpURL func(childComplexity int) int
 	}
 
-	CreatePaypayQRCodePayload struct {
-		DeepLink func(childComplexity int) int
-		URL      func(childComplexity int) int
+	CreateOrderPayload struct {
+		OrderID func(childComplexity int) int
+		Price   func(childComplexity int) int
+		URL     func(childComplexity int) int
 	}
 }
 
 type MutationResolver interface {
-	CreatePaypayQRCode(ctx context.Context, input graphql1.PaypayQRCodeInput) (*graphql1.CreatePaypayQRCodePayload, error)
+	CreateOrder(ctx context.Context, input graphql1.CreateOrderInput) (*graphql1.CreateOrderPayload, error)
 }
 type QueryResolver interface {
 	VariantGroupDetail(ctx context.Context, id string) (*graphql1.VariantGroupDetail, error)
@@ -141,17 +142,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.DeliveryTimeRange.To(childComplexity), true
 
-	case "Mutation.createPaypayQRCode":
-		if e.complexity.Mutation.CreatePaypayQRCode == nil {
+	case "Mutation.createOrder":
+		if e.complexity.Mutation.CreateOrder == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_createPaypayQRCode_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_createOrder_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreatePaypayQRCode(childComplexity, args["input"].(graphql1.PaypayQRCodeInput)), true
+		return e.complexity.Mutation.CreateOrder(childComplexity, args["input"].(graphql1.CreateOrderInput)), true
 
 	case "Product.contents":
 		if e.complexity.Product.Contents == nil {
@@ -284,19 +285,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.WebpPngImageURL.WebpURL(childComplexity), true
 
-	case "createPaypayQRCodePayload.deepLink":
-		if e.complexity.CreatePaypayQRCodePayload.DeepLink == nil {
+	case "createOrderPayload.orderID":
+		if e.complexity.CreateOrderPayload.OrderID == nil {
 			break
 		}
 
-		return e.complexity.CreatePaypayQRCodePayload.DeepLink(childComplexity), true
+		return e.complexity.CreateOrderPayload.OrderID(childComplexity), true
 
-	case "createPaypayQRCodePayload.url":
-		if e.complexity.CreatePaypayQRCodePayload.URL == nil {
+	case "createOrderPayload.price":
+		if e.complexity.CreateOrderPayload.Price == nil {
 			break
 		}
 
-		return e.complexity.CreatePaypayQRCodePayload.URL(childComplexity), true
+		return e.complexity.CreateOrderPayload.Price(childComplexity), true
+
+	case "createOrderPayload.url":
+		if e.complexity.CreateOrderPayload.URL == nil {
+			break
+		}
+
+		return e.complexity.CreateOrderPayload.URL(childComplexity), true
 
 	}
 	return 0, false
@@ -306,8 +314,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputAddressInput,
-		ec.unmarshalInputPaypayQRCodeInput,
+		ec.unmarshalInputcreateOrderInput,
 	)
 	first := true
 
@@ -387,13 +394,13 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_createPaypayQRCode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_createOrder_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 graphql1.PaypayQRCodeInput
+	var arg0 graphql1.CreateOrderInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNPaypayQRCodeInput2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐPaypayQRCodeInput(ctx, tmp)
+		arg0, err = ec.unmarshalNcreateOrderInput2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreateOrderInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -602,8 +609,8 @@ func (ec *executionContext) fieldContext_DeliveryTimeRange_to(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_createPaypayQRCode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_createPaypayQRCode(ctx, field)
+func (ec *executionContext) _Mutation_createOrder(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createOrder(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -616,24 +623,21 @@ func (ec *executionContext) _Mutation_createPaypayQRCode(ctx context.Context, fi
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreatePaypayQRCode(rctx, fc.Args["input"].(graphql1.PaypayQRCodeInput))
+		return ec.resolvers.Mutation().CreateOrder(rctx, fc.Args["input"].(graphql1.CreateOrderInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(*graphql1.CreatePaypayQRCodePayload)
+	res := resTmp.(*graphql1.CreateOrderPayload)
 	fc.Result = res
-	return ec.marshalNcreatePaypayQRCodePayload2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreatePaypayQRCodePayload(ctx, field.Selections, res)
+	return ec.marshalOcreateOrderPayload2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreateOrderPayload(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_createPaypayQRCode(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_createOrder(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -641,12 +645,14 @@ func (ec *executionContext) fieldContext_Mutation_createPaypayQRCode(ctx context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "orderID":
+				return ec.fieldContext_createOrderPayload_orderID(ctx, field)
+			case "price":
+				return ec.fieldContext_createOrderPayload_price(ctx, field)
 			case "url":
-				return ec.fieldContext_createPaypayQRCodePayload_url(ctx, field)
-			case "deepLink":
-				return ec.fieldContext_createPaypayQRCodePayload_deepLink(ctx, field)
+				return ec.fieldContext_createOrderPayload_url(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type createPaypayQRCodePayload", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type createOrderPayload", field.Name)
 		},
 	}
 	defer func() {
@@ -656,7 +662,7 @@ func (ec *executionContext) fieldContext_Mutation_createPaypayQRCode(ctx context
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createPaypayQRCode_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_createOrder_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -3420,8 +3426,96 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _createPaypayQRCodePayload_url(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreatePaypayQRCodePayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_createPaypayQRCodePayload_url(ctx, field)
+func (ec *executionContext) _createOrderPayload_orderID(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreateOrderPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_createOrderPayload_orderID(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.OrderID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_createOrderPayload_orderID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "createOrderPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _createOrderPayload_price(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreateOrderPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_createOrderPayload_price(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Price, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_createOrderPayload_price(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "createOrderPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _createOrderPayload_url(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreateOrderPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_createOrderPayload_url(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3441,63 +3535,16 @@ func (ec *executionContext) _createPaypayQRCodePayload_url(ctx context.Context, 
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_createPaypayQRCodePayload_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_createOrderPayload_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "createPaypayQRCodePayload",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _createPaypayQRCodePayload_deepLink(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreatePaypayQRCodePayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_createPaypayQRCodePayload_deepLink(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.DeepLink, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_createPaypayQRCodePayload_deepLink(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "createPaypayQRCodePayload",
+		Object:     "createOrderPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -3512,25 +3559,73 @@ func (ec *executionContext) fieldContext_createPaypayQRCodePayload_deepLink(ctx 
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputAddressInput(ctx context.Context, obj interface{}) (graphql1.AddressInput, error) {
-	var it graphql1.AddressInput
+func (ec *executionContext) unmarshalInputcreateOrderInput(ctx context.Context, obj interface{}) (graphql1.CreateOrderInput, error) {
+	var it graphql1.CreateOrderInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"zip", "prefecture", "addressOne", "addressTwo"}
+	fieldsInOrder := [...]string{"productID", "paymentMethod", "userID", "phoneNumber", "addressID", "emailAddress", "zipCode", "prefecture", "city", "streetAddress", "building", "lastName", "firstName"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "zip":
+		case "productID":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("zip"))
-			it.Zip, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
+			it.ProductID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "paymentMethod":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paymentMethod"))
+			it.PaymentMethod, err = ec.unmarshalNPaymentMethod2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐPaymentMethod(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "userID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+			it.UserID, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "phoneNumber":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phoneNumber"))
+			it.PhoneNumber, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "addressID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("addressID"))
+			it.AddressID, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailAddress":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("emailAddress"))
+			it.EmailAddress, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "zipCode":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("zipCode"))
+			it.ZipCode, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3542,79 +3637,43 @@ func (ec *executionContext) unmarshalInputAddressInput(ctx context.Context, obj 
 			if err != nil {
 				return it, err
 			}
-		case "addressOne":
+		case "city":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("addressOne"))
-			it.AddressOne, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("city"))
+			it.City, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "addressTwo":
+		case "streetAddress":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("addressTwo"))
-			it.AddressTwo, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("streetAddress"))
+			it.StreetAddress, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputPaypayQRCodeInput(ctx context.Context, obj interface{}) (graphql1.PaypayQRCodeInput, error) {
-	var it graphql1.PaypayQRCodeInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"emailAddress", "phoneNumber", "address", "amount", "orderDescription"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "emailAddress":
+		case "building":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("emailAddress"))
-			it.EmailAddress, err = ec.unmarshalNEmailAddress2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("building"))
+			it.Building, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "phoneNumber":
+		case "lastName":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phoneNumber"))
-			it.PhoneNumber, err = ec.unmarshalNPhoneNumber2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lastName"))
+			it.LastName, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "address":
+		case "firstName":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("address"))
-			it.Address, err = ec.unmarshalNAddressInput2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐAddressInput(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "amount":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
-			it.Amount, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "orderDescription":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("orderDescription"))
-			it.OrderDescription, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firstName"))
+			it.FirstName, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3714,15 +3773,12 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "createPaypayQRCode":
+		case "createOrder":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createPaypayQRCode(ctx, field)
+				return ec._Mutation_createOrder(ctx, field)
 			})
 
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4332,30 +4388,34 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
-var createPaypayQRCodePayloadImplementors = []string{"createPaypayQRCodePayload"}
+var createOrderPayloadImplementors = []string{"createOrderPayload"}
 
-func (ec *executionContext) _createPaypayQRCodePayload(ctx context.Context, sel ast.SelectionSet, obj *graphql1.CreatePaypayQRCodePayload) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, createPaypayQRCodePayloadImplementors)
+func (ec *executionContext) _createOrderPayload(ctx context.Context, sel ast.SelectionSet, obj *graphql1.CreateOrderPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, createOrderPayloadImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("createPaypayQRCodePayload")
+			out.Values[i] = graphql.MarshalString("createOrderPayload")
+		case "orderID":
+
+			out.Values[i] = ec._createOrderPayload_orderID(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "price":
+
+			out.Values[i] = ec._createOrderPayload_price(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "url":
 
-			out.Values[i] = ec._createPaypayQRCodePayload_url(ctx, field, obj)
+			out.Values[i] = ec._createOrderPayload_url(ctx, field, obj)
 
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "deepLink":
-
-			out.Values[i] = ec._createPaypayQRCodePayload_deepLink(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4370,11 +4430,6 @@ func (ec *executionContext) _createPaypayQRCodePayload(ctx context.Context, sel 
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
-
-func (ec *executionContext) unmarshalNAddressInput2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐAddressInput(ctx context.Context, v interface{}) (*graphql1.AddressInput, error) {
-	res, err := ec.unmarshalInputAddressInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
 
 func (ec *executionContext) marshalNAllActiveVariantGroupIDs2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐAllActiveVariantGroupIDs(ctx context.Context, sel ast.SelectionSet, v graphql1.AllActiveVariantGroupIDs) graphql.Marshaler {
 	return ec._AllActiveVariantGroupIDs(ctx, sel, &v)
@@ -4415,21 +4470,6 @@ func (ec *executionContext) marshalNDeliveryTimeRange2ᚖgithubᚗcomᚋPochirif
 	return ec._DeliveryTimeRange(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNEmailAddress2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalString(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNEmailAddress2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalString(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
-}
-
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4460,24 +4500,14 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) unmarshalNPaypayQRCodeInput2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐPaypayQRCodeInput(ctx context.Context, v interface{}) (graphql1.PaypayQRCodeInput, error) {
-	res, err := ec.unmarshalInputPaypayQRCodeInput(ctx, v)
+func (ec *executionContext) unmarshalNPaymentMethod2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐPaymentMethod(ctx context.Context, v interface{}) (graphql1.PaymentMethod, error) {
+	var res graphql1.PaymentMethod
+	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPhoneNumber2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalString(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNPhoneNumber2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalString(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
+func (ec *executionContext) marshalNPaymentMethod2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐPaymentMethod(ctx context.Context, sel ast.SelectionSet, v graphql1.PaymentMethod) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNProduct2ᚕᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐProductᚄ(ctx context.Context, sel ast.SelectionSet, v []*graphql1.Product) graphql.Marshaler {
@@ -4868,18 +4898,9 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalNcreatePaypayQRCodePayload2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreatePaypayQRCodePayload(ctx context.Context, sel ast.SelectionSet, v graphql1.CreatePaypayQRCodePayload) graphql.Marshaler {
-	return ec._createPaypayQRCodePayload(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNcreatePaypayQRCodePayload2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreatePaypayQRCodePayload(ctx context.Context, sel ast.SelectionSet, v *graphql1.CreatePaypayQRCodePayload) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._createPaypayQRCodePayload(ctx, sel, v)
+func (ec *executionContext) unmarshalNcreateOrderInput2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreateOrderInput(ctx context.Context, v interface{}) (graphql1.CreateOrderInput, error) {
+	res, err := ec.unmarshalInputcreateOrderInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
@@ -5124,6 +5145,13 @@ func (ec *executionContext) marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return ec.___Type(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOcreateOrderPayload2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreateOrderPayload(ctx context.Context, sel ast.SelectionSet, v *graphql1.CreateOrderPayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._createOrderPayload(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

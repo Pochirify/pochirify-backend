@@ -23,7 +23,6 @@ func (r *productRepository) Find(ctx context.Context, id string) (*model.Product
 		ID:               id,
 		Title:            "商品タイトルるううううううううううううう",
 		Price:            100,
-		Contents:         [5]string{"contents1", "contents2", "contents3", "contents4", "contents5"},
 		ProductVariantID: &vID,
 	}, nil
 }
@@ -31,16 +30,14 @@ func (r *productRepository) Find(ctx context.Context, id string) (*model.Product
 func (r *productRepository) GetMultiByIDs(ctx context.Context, ids []string) ([]*model.Product, error) {
 	return []*model.Product{
 		{
-			ID:       "1",
-			Title:    "商品タイトルるううううううううううううう",
-			Price:    100,
-			Contents: [5]string{"contents1", "contents2", "contents3", "contents4"},
+			ID:    "1",
+			Title: "商品タイトルるううううううううううううう",
+			Price: 100,
 		},
 		{
-			ID:       "2",
-			Title:    "商品タイトル2222222222222222",
-			Price:    100,
-			Contents: [5]string{"contents1", "contents2", "contents3"},
+			ID:    "2",
+			Title: "商品タイトル2222222222222222",
+			Price: 100,
 		},
 	}, nil
 }
@@ -50,4 +47,8 @@ func (r *productRepository) FindProductVariant(ctx context.Context, id string) (
 		ID:         uuid.NewString(),
 		ProductIDs: [5]string{"1", "2"},
 	}, nil
+}
+
+func (r *productRepository) Update(ctx context.Context, product *model.Product) error {
+	return nil
 }

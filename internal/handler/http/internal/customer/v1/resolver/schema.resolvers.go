@@ -11,26 +11,16 @@ import (
 	"github.com/Pochirify/pochirify-backend/internal/usecase"
 )
 
-// CreatePaypayQRCode is the resolver for the createPaypayQRCode field.
-func (r *mutationResolver) CreatePaypayQRCode(ctx context.Context, input graphql1.PaypayQRCodeInput) (*graphql1.CreatePaypayQRCodePayload, error) {
-	output, err := r.App.CreatePaypayQRCode(ctx, &usecase.CreatePaypayQRCodeInput{
-		EmailAddress: input.EmailAddress,
-		PhoneNumber:  input.PhoneNumber,
-		Zip:          input.Address.Zip,
-		Prefecture:   input.Address.Prefecture,
-		AddressOne:   input.Address.AddressOne,
-		AddressTwo:   input.Address.AddressTwo,
-
-		Amount:           input.Amount,
-		OrderDescription: input.OrderDescription,
-	})
+// CreateOrder is the resolver for the createOrder field.
+func (r *mutationResolver) CreateOrder(ctx context.Context, input graphql1.CreateOrderInput) (*graphql1.CreateOrderPayload, error) {
+	output, err := r.App.CreateOrder(ctx, &usecase.CreateOrderInput{})
 	if err != nil {
 		return nil, err
 	}
 
-	return &graphql1.CreatePaypayQRCodePayload{
-		URL:      output.QRCode.QRCodeUrl,
-		DeepLink: output.QRCode.QRCodeDeepLink,
+	return &graphql1.CreateOrderPayload{
+		OrderID: output.OrderID,
+		URL:     output.URL,
 	}, nil
 }
 

@@ -4,42 +4,30 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 var newUserError = errors.New("pochirify-backend-internal-domain-model: failed to create new user")
 
 type User struct {
 	// TODO: userIDはphoneNumberからつくる。住所は複数持つ
-	ID                 UserID
-	EmailAddressDigest string
-	PhoneNumberDigest  string
-	CreateTime         time.Time
-	UpdateTime         time.Time
+	ID                string
+	PhoneNumberDigest string
+	IsAuthenticated   bool
+	CreateTime        time.Time
+	UpdateTime        time.Time
 }
 
-type UserID string
-
-func NewUser(emailAddress, phoneNumber string) (*User, error) {
-	ea, err := NewEmailAddress(emailAddress)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", err, newUserError)
-	}
-	pn, err := NewPhoneNumber(phoneNumber)
+func NewUser(phoneNumber string) (*User, error) {
+	pn, err := newPhoneNumber(phoneNumber)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", err, newUserError)
 	}
 
 	return &User{
-		ID:                 NewUserID(ea, pn),
-		EmailAddressDigest: ea.ToDigest(),
-		PhoneNumberDigest:  pn.ToDigest(),
+		ID:                uuid.NewString(),
+		PhoneNumberDigest: pn.toDigest(),
+		IsAuthenticated:   false,
 	}, nil
-}
-
-func NewUserID(emailAddress EmailAddress, phoneNumber PhoneNumber) UserID {
-	return UserID(generateHashKey(emailAddress.string(), phoneNumber.string()))
-}
-
-func (uid UserID) String() string {
-	return string(uid)
 }

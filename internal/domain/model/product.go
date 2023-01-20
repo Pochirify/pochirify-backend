@@ -6,10 +6,18 @@ type Product struct {
 	ID                string
 	VendorID          string
 	Title             string
-	Price             uint
-	Contents          [5]string
-	ShippingTimeRange *ShippingTimeRange
+	Price             int
+	ShippingTimeRange int // day
+	Stock             int
+	ContentOne        string
+	ContentTwo        *string
+	ContentThree      *string
+	ContentFour       *string
 	ProductVariantID  *string
 	CreateTime        time.Time
 	UpdateTime        time.Time
+}
+
+func (p *Product) Bought() {
+	p.Stock--
 }

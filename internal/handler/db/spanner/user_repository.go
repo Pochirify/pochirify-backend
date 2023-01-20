@@ -16,6 +16,18 @@ func newUserRepository() *userRepository {
 	return &userRepository{}
 }
 
+func (r userRepository) Find(ctx context.Context, userID string) (*model.User, error) {
+	return nil, nil
+}
+
+func (r userRepository) Create(ctx context.Context, u *model.User) error {
+	return nil
+}
+
+func (r userRepository) FindUserAddress(ctx context.Context, addressID string) (*model.UserAddress, error) {
+	return nil, nil
+}
+
 func (r userRepository) Upsert(ctx context.Context, user *model.User) error {
 	log.Println(user)
 	return nil

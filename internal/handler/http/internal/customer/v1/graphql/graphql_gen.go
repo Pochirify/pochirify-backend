@@ -2,12 +2,11 @@
 
 package graphql
 
-type AddressInput struct {
-	Zip        string  `json:"zip"`
-	Prefecture string  `json:"prefecture"`
-	AddressOne string  `json:"addressOne"`
-	AddressTwo *string `json:"addressTwo"`
-}
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
 
 type AllActiveVariantGroupIDs struct {
 	Ids []string `json:"ids"`
@@ -16,14 +15,6 @@ type AllActiveVariantGroupIDs struct {
 type DeliveryTimeRange struct {
 	From string `json:"from"`
 	To   string `json:"to"`
-}
-
-type PaypayQRCodeInput struct {
-	EmailAddress     string        `json:"emailAddress"`
-	PhoneNumber      string        `json:"phoneNumber"`
-	Address          *AddressInput `json:"address"`
-	Amount           int           `json:"amount"`
-	OrderDescription string        `json:"orderDescription"`
 }
 
 type Product struct {
@@ -54,7 +45,69 @@ type WebpPngImageURL struct {
 	PngURL  string `json:"pngURL"`
 }
 
-type CreatePaypayQRCodePayload struct {
-	URL      string `json:"url"`
-	DeepLink string `json:"deepLink"`
+type CreateOrderInput struct {
+	ProductID     string        `json:"productID"`
+	PaymentMethod PaymentMethod `json:"paymentMethod"`
+	UserID        *string       `json:"userID"`
+	PhoneNumber   string        `json:"phoneNumber"`
+	AddressID     *string       `json:"addressID"`
+	EmailAddress  string        `json:"emailAddress"`
+	ZipCode       int           `json:"zipCode"`
+	Prefecture    string        `json:"prefecture"`
+	City          string        `json:"city"`
+	StreetAddress string        `json:"streetAddress"`
+	Building      *string       `json:"building"`
+	LastName      string        `json:"lastName"`
+	FirstName     string        `json:"firstName"`
+}
+
+type CreateOrderPayload struct {
+	OrderID string  `json:"orderID"`
+	Price   int     `json:"price"`
+	URL     *string `json:"url"`
+}
+
+type PaymentMethod string
+
+const (
+	PaymentMethodCard      PaymentMethod = "CARD"
+	PaymentMethodPaypay    PaymentMethod = "PAYPAY"
+	PaymentMethodApplePay  PaymentMethod = "APPLE_PAY"
+	PaymentMethodGooglePay PaymentMethod = "GOOGLE_PAY"
+)
+
+var AllPaymentMethod = []PaymentMethod{
+	PaymentMethodCard,
+	PaymentMethodPaypay,
+	PaymentMethodApplePay,
+	PaymentMethodGooglePay,
+}
+
+func (e PaymentMethod) IsValid() bool {
+	switch e {
+	case PaymentMethodCard, PaymentMethodPaypay, PaymentMethodApplePay, PaymentMethodGooglePay:
+		return true
+	}
+	return false
+}
+
+func (e PaymentMethod) String() string {
+	return string(e)
+}
+
+func (e *PaymentMethod) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PaymentMethod(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PaymentMethod", str)
+	}
+	return nil
+}
+
+func (e PaymentMethod) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

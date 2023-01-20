@@ -1,0 +1,53 @@
+
+query allActiveProductIDs {
+  allActiveProductIDs {
+      ids
+  }
+}
+
+mutation createPaypayQRCode {
+    createPaypayQRCode(input: {
+            emailAddress: "aa@gmail.com",
+            phoneNumber: "+818033334444",
+            address: {
+                zip: "182-0012",
+                prefecture: "東京都",
+                addressOne: "新宿区歌舞伎町1-22",
+                addressTwo: "タワーマンション15F",
+            }
+            amount: 500,
+            orderDescription: "orderDescription"
+        }
+    ) {
+        url
+        deepLink
+    }
+}
+
+query variantGroupDetail {
+    variantGroupDetail(id: "1") {
+        variantGroup: variantGroup {
+            id
+            title
+            imageURLs
+            DeliveryTimeRange {
+                from
+                to
+            }
+        }
+        variants: variants {
+                id
+                title
+                price
+                contents
+                imageURL
+        }
+    }
+}
+
+query allActiveVariantGroupID {
+  allActiveVariantGroupIDs {
+      ids
+  }
+}
+

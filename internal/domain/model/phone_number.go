@@ -2,14 +2,15 @@ package model
 
 type PhoneNumber string
 
-func NewPhoneNumber(phoneNumber string) (PhoneNumber, error) {
+// TODO: validate
+func newPhoneNumber(phoneNumber string) (PhoneNumber, error) {
 	return PhoneNumber(phoneNumber), nil
 }
 
-func (ea PhoneNumber) ToDigest() string {
-	return generateHashKey(ea.string())
+func (ea PhoneNumber) toDigest() string {
+	return generateHashKey(ea.String())
 }
 
-func (pn PhoneNumber) string() string {
+func (pn PhoneNumber) String() string {
 	return string(pn)
 }
