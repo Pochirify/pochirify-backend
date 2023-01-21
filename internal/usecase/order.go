@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/Pochirify/pochirify-backend/internal/domain/model"
+	"github.com/Pochirify/pochirify-backend/internal/domain/payment"
 )
 
 var (
@@ -34,8 +35,15 @@ type CreateOrderInput struct {
 }
 
 type CreateOrderOutput struct {
-	OrderID string
-	URL     *string
+	OrderID     string
+	Price       int
+	OrderOutput *OrderUnion
+}
+
+type OrderUnion struct {
+	// return only one from
+	CreditCardOrder *payment.CreditCardOrder
+	PayPayOrder     *payment.PayPayOrder
 }
 
 func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateOrderOutput, error) {
@@ -76,17 +84,26 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 		}
 	}
 
-	// var url *string
-	// switch {
-	// case input.PaymentMethod.IsPayPay():
-	// 	qr, err := a.paypayClient.CreateQRCode(ctx, "", "")
-	// 	if err != nil {
-	// 		return nil, fmt.Errorf("%s: %w", err, errCreateOrder)
-	// 	}
-	// 	url = &qr.QRCodeUrl
-	// }
+	// NOTE: 価格はここで確定する
+	var price int
+	if product, err := a.ProductRepo.Find(ctx, input.ProductID); err != nil {
+		return nil, fmt.Errorf("%s: %w", err, errCreateOrder)
+	} else {
+		price = product.Price
+	}
 
-	var order *model.Order
+	order := model.NewOrder(
+		user,
+		userAddress,
+		input.PaymentMethod,
+		input.ProductID,
+		price,
+	)
+	orderOutput, err := a.getOrderOutput(ctx, input.PaymentMethod, order.ID, price)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", err, errCreateOrder)
+	}
+
 	err = a.Tx.Transaction(ctx, func(ctx context.Context) error {
 		// TODO: lockの順番
 		product, tErr := a.ProductRepo.Find(ctx, input.ProductID)
@@ -98,13 +115,6 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 			return tErr
 		}
 
-		order = model.NewOrder(
-			user,
-			userAddress,
-			input.PaymentMethod,
-			product.ID,
-			product.Price,
-		)
 		if tErr := a.OrderRepo.Create(ctx, order); tErr != nil {
 			return tErr
 		}
@@ -126,9 +136,40 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 	}
 
 	return &CreateOrderOutput{
-		OrderID: order.ID,
-		// URL:     url,
+		OrderID:     order.ID,
+		Price:       price,
+		OrderOutput: orderOutput,
 	}, nil
+}
+
+func (a App) getOrderOutput(
+	ctx context.Context,
+	paymentMethod model.PaymentMethod,
+	orderID string,
+	price int,
+) (*OrderUnion, error) {
+	switch {
+	case paymentMethod.IsPayPay():
+		qr, err := a.paypayClient.CreateOrder(ctx, orderID, price)
+		if err != nil {
+			return nil, err
+		}
+
+		return &OrderUnion{
+			PayPayOrder: qr,
+		}, nil
+	case paymentMethod.IsCard():
+		order, err := a.creditCardClient.CreateOrder(ctx, orderID, price)
+		if err != nil {
+			return nil, err
+		}
+
+		return &OrderUnion{
+			CreditCardOrder: order,
+		}, nil
+	default:
+		return nil, fmt.Errorf("failed to get order output. paymentMethod=%s", paymentMethod.String())
+	}
 }
 
 // type CreatePaypayQRCodeInput struct {

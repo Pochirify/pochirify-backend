@@ -60,6 +60,10 @@ func (m PaymentMethod) IsPayPay() bool {
 	return m == PaymentMethodPayPay
 }
 
+func (m PaymentMethod) IsCard() bool {
+	return m == PaymentMethodCard
+}
+
 func (m PaymentMethod) String() string {
 	switch m {
 	case PaymentMethodCard:

@@ -8,6 +8,10 @@ import (
 	"strconv"
 )
 
+type OrderResult interface {
+	IsOrderResult()
+}
+
 type AllActiveVariantGroupIDs struct {
 	Ids []string `json:"ids"`
 }
@@ -62,10 +66,23 @@ type CreateOrderInput struct {
 }
 
 type CreateOrderPayload struct {
-	OrderID string  `json:"orderID"`
-	Price   int     `json:"price"`
-	URL     *string `json:"url"`
+	OrderID     string      `json:"orderID"`
+	Price       int         `json:"price"`
+	OrderResult OrderResult `json:"orderResult"`
 }
+
+type CreditCardResult struct {
+	CardOrderID string `json:"cardOrderID"`
+	AccessID    string `json:"accessID"`
+}
+
+func (CreditCardResult) IsOrderResult() {}
+
+type PaypayOrderResult struct {
+	URL string `json:"url"`
+}
+
+func (PaypayOrderResult) IsOrderResult() {}
 
 type PaymentMethod string
 

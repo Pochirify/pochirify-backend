@@ -5,14 +5,15 @@ package resolver
 
 import (
 	"context"
+	"log"
 
 	graphql1 "github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/graphql"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/graphql/request"
+	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/graphql/response"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/schema"
 )
 
 // TODO: error文はinternalで閉じる
-// CreateOrder is the resolver for the createOrder field.
 func (r *mutationResolver) CreateOrder(ctx context.Context, input graphql1.CreateOrderInput) (*graphql1.CreateOrderPayload, error) {
 	output, err := r.App.CreateOrder(
 		ctx,
@@ -21,11 +22,14 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, input graphql1.Creat
 	if err != nil {
 		return nil, err
 	}
+	log.Println(output)
 
-	return &graphql1.CreateOrderPayload{
-		OrderID: output.OrderID,
-		URL:     output.URL,
-	}, nil
+	payload, err := response.NewCreateOrderPayload(output)
+	if err != nil {
+		return nil, err
+	}
+
+	return payload, nil
 }
 
 // VariantGroupDetail is the resolver for the variantGroupDetail field.

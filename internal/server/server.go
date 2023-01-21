@@ -8,6 +8,7 @@ import (
 	"github.com/Pochirify/pochirify-backend/internal/handler/db/spanner"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http"
 	"github.com/Pochirify/pochirify-backend/internal/handler/logger/json"
+	"github.com/Pochirify/pochirify-backend/internal/handler/payment"
 )
 
 func Run() {
@@ -44,6 +45,14 @@ func run(ctx context.Context) error {
 		Port:    env.Port,
 		Logger:  l,
 		Spanner: spannerClient,
+		PayPayClient: payment.NewPaypayClient(
+			env.IsPayPayProduction,
+			env.PayPayApiKeyID,
+			env.PayPayApiSecret,
+			env.PayPayMerchantID,
+			env.PayPayRedirectURL,
+		),
+		CreditCardClient: payment.NewCreditCardClient(env.FincodeApiKey, env.FincodeBaseURL),
 	}
 
 	return http.NewServer(ctx, config).Start()

@@ -83,8 +83,19 @@ input createOrderInput {
 type createOrderPayload {
   orderID: String!
   price: Int!
-  url: String
+  orderResult: orderResult!
 }
+
+type paypayOrderResult {
+  url: String!
+}
+
+type creditCardResult {
+  cardOrderID: String!
+  accessID: String!
+}
+
+union orderResult = paypayOrderResult | creditCardResult
 
 type Mutation {
   createOrder(input: createOrderInput!): createOrderPayload

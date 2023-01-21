@@ -1,3 +1,4 @@
 .env
 /credential
 /dev/bin
+/vendor

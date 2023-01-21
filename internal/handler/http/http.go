@@ -12,7 +12,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 
-	"github.com/Pochirify/pochirify-backend/internal/domain/payment/paypay"
+	"github.com/Pochirify/pochirify-backend/internal/domain/payment"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/resolver"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/schema"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/middleware"
@@ -30,6 +30,9 @@ type Config struct {
 	Port    uint
 	Logger  logger.Logger
 	Spanner *spanner.Client
+
+	PayPayClient     payment.PaypayClient
+	CreditCardClient payment.CreditCardClient
 }
 
 func NewServer(ctx context.Context, c *Config) *Server {
@@ -44,8 +47,9 @@ func NewServer(ctx context.Context, c *Config) *Server {
 	spanner := appspanner.NewSpanner(c.Spanner, newLoggerFactory(c.Logger.WithName("spanner")))
 	repositories := appspanner.InitRepositories(spanner)
 	app := usecase.NewApp(&usecase.Config{
-		PaypayClient: paypay.NewPaypayClient(),
-		Repositories: repositories,
+		PaypayClient:     c.PayPayClient,
+		CreditCardClient: c.CreditCardClient,
+		Repositories:     repositories,
 	})
 
 	config := &resolver.Config{App: app}
