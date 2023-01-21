@@ -53,9 +53,11 @@ backend-deploy:
 		--update-env-vars GCP_PROJECT_ID=$(GCP_PROJECT_ID) \
 		--update-env-vars SPANNER_INSTANCE_ID=$(SPANNER_INSTANCE_ID) \
 		--update-env-vars FINCODE_API_KEY=$(FINCODE_API_KEY) \
-		--update-env-vars FINCODE_BASE_URL=$(FINCODE_BASE_URL)
-		--update-env-vars IS_PAYPAY_PRODUCTION=$(IS_PAYPAY_PRODUCTION)
-		--update-env-vars PAYPAY_API_KEY_ID=$(PAYPAY_API_KEY_ID)
-		--update-env-vars PAYPAY_API_SECRET=$(PAYPAY_API_SECRET)
-		--update-env-vars PAYPAY_MERCHANT_ID=$(PAYPAY_MERCHANT_ID)
+		--update-env-vars FINCODE_BASE_URL=$(FINCODE_BASE_URL) \
+		--update-env-vars IS_PAYPAY_PRODUCTION=$(IS_PAYPAY_PRODUCTION) \
+		--update-env-vars PAYPAY_API_KEY_ID=$(PAYPAY_API_KEY_ID) \
+		--update-env-vars PAYPAY_API_SECRET=$(PAYPAY_API_SECRET) \
+		--update-env-vars PAYPAY_MERCHANT_ID=$(PAYPAY_MERCHANT_ID) \
 		--update-env-vars PAYPAY_REDIRECT_URL=$(PAYPAY_REDIRECT_URL)
+
+backend-deploy-all: backend-image backend-registry backend-deploy
