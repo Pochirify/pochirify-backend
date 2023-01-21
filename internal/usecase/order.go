@@ -76,15 +76,15 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 		}
 	}
 
-	var url *string
-	switch {
-	case input.PaymentMethod.IsPayPay():
-		qr, err := a.paypayClient.CreateQRCode(ctx, "", "")
-		if err != nil {
-			return nil, fmt.Errorf("%s: %w", err, errCreateOrder)
-		}
-		url = &qr.QRCodeUrl
-	}
+	// var url *string
+	// switch {
+	// case input.PaymentMethod.IsPayPay():
+	// 	qr, err := a.paypayClient.CreateQRCode(ctx, "", "")
+	// 	if err != nil {
+	// 		return nil, fmt.Errorf("%s: %w", err, errCreateOrder)
+	// 	}
+	// 	url = &qr.QRCodeUrl
+	// }
 
 	var order *model.Order
 	err = a.Tx.Transaction(ctx, func(ctx context.Context) error {
@@ -127,7 +127,7 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 
 	return &CreateOrderOutput{
 		OrderID: order.ID,
-		URL:     url,
+		// URL:     url,
 	}, nil
 }
 

@@ -7,13 +7,17 @@ import (
 	"context"
 
 	graphql1 "github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/graphql"
+	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/graphql/request"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/schema"
-	"github.com/Pochirify/pochirify-backend/internal/usecase"
 )
 
+// TODO: error文はinternalで閉じる
 // CreateOrder is the resolver for the createOrder field.
 func (r *mutationResolver) CreateOrder(ctx context.Context, input graphql1.CreateOrderInput) (*graphql1.CreateOrderPayload, error) {
-	output, err := r.App.CreateOrder(ctx, &usecase.CreateOrderInput{})
+	output, err := r.App.CreateOrder(
+		ctx,
+		request.NewCreateOrderInput(input),
+	)
 	if err != nil {
 		return nil, err
 	}

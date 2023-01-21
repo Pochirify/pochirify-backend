@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Pochirify/pochirify-backend/internal/domain/payment/paypay"
 	"github.com/Pochirify/pochirify-backend/internal/handler/db/spanner"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http"
 	"github.com/Pochirify/pochirify-backend/internal/handler/logger/json"
-	"github.com/Pochirify/pochirify-backend/internal/usecase"
 )
 
 func Run() {
@@ -30,16 +28,22 @@ func run(ctx context.Context) error {
 		return fmt.Errorf("failed to create logger: %w", err)
 	}
 
-	repositories := spanner.InitRepositories()
-	app := usecase.NewApp(&usecase.Config{
-		PaypayClient: paypay.NewPaypayClient(),
-		Repositories: repositories,
-	})
+	spannerClient, err := spanner.NewClient(
+		ctx,
+		&spanner.ClientConfig{
+			ProjectID:  env.GCPProjectID,
+			InstanceID: env.SpannerInstanceID,
+			DatabaseID: env.SpannerDatabaseID,
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create spanner client: %w", err)
+	}
 
 	config := &http.Config{
-		Port:   env.Port,
-		Logger: l,
-		App:    app,
+		Port:    env.Port,
+		Logger:  l,
+		Spanner: spannerClient,
 	}
 
 	return http.NewServer(ctx, config).Start()

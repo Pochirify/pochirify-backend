@@ -6,10 +6,13 @@ import (
 	"log"
 	"net/http"
 
+	"cloud.google.com/go/spanner"
 	gqlhandler "github.com/99designs/gqlgen/graphql/handler"
+	appspanner "github.com/Pochirify/pochirify-backend/internal/handler/db/spanner"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 
+	"github.com/Pochirify/pochirify-backend/internal/domain/payment/paypay"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/resolver"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/schema"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/middleware"
@@ -24,10 +27,9 @@ type Server struct {
 }
 
 type Config struct {
-	Port   uint
-	Logger logger.Logger
-
-	App usecase.App
+	Port    uint
+	Logger  logger.Logger
+	Spanner *spanner.Client
 }
 
 func NewServer(ctx context.Context, c *Config) *Server {
@@ -39,14 +41,21 @@ func NewServer(ctx context.Context, c *Config) *Server {
 	}))
 	r.Use(middleware.NewRequestLogger(newLoggerFactory(c.Logger.WithName("request_logger"))))
 
-	config := &resolver.Config{App: c.App}
+	spanner := appspanner.NewSpanner(c.Spanner, newLoggerFactory(c.Logger.WithName("spanner")))
+	repositories := appspanner.InitRepositories(spanner)
+	app := usecase.NewApp(&usecase.Config{
+		PaypayClient: paypay.NewPaypayClient(),
+		Repositories: repositories,
+	})
+
+	config := &resolver.Config{App: app}
 	srv := gqlhandler.NewDefaultServer(
 		schema.NewExecutableSchema(
 			schema.Config{Resolvers: resolver.NewResolver(config)},
 		),
 	)
 
-	webhookHandler := webhookv1.NewWebhookHandler(c.App)
+	webhookHandler := webhookv1.NewWebhookHandler(app)
 	r.Handle("/api/webhook", webhookHandler.PayPayTransactionEventHandler())
 
 	r.Handle("/api/query", srv)

@@ -33,11 +33,11 @@ func NewUserAddress(
 	lastName,
 	firstName string,
 ) (*UserAddress, error) {
-	email, err := newEmailAddress(emailAddress)
+	email, err := NewEmailAddress(emailAddress)
 	if err != nil {
 		return nil, err
 	}
-	zip, err := newZipCode(zipCode)
+	zip, err := NewZipCode(zipCode)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func NewUserAddress(
 type ZipCode int
 
 // FIXME: properer validation
-func newZipCode(zipCode int) (ZipCode, error) {
+func NewZipCode(zipCode int) (ZipCode, error) {
 	return ZipCode(zipCode), nil
 }
 

@@ -2,11 +2,11 @@ package spanner
 
 import "github.com/Pochirify/pochirify-backend/internal/domain/repository"
 
-func InitRepositories() repository.Repositories {
+func InitRepositories(spanner *Spanner) repository.Repositories {
 	return repository.Repositories{
-		UserRepo:    newUserRepository(),
-		OrderRepo:   newOrderRepository(),
-		ProductRepo: newProductRepository(),
+		UserRepo:    newUserRepository(spanner),
+		OrderRepo:   newOrderRepository(spanner),
+		ProductRepo: newProductRepository(spanner),
 		Tx:          newTransaction(),
 	}
 }

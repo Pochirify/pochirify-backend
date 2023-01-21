@@ -16,5 +16,5 @@ func newTransaction() repository.Transaction {
 }
 
 func (t transaction) Transaction(ctx context.Context, f func(context.Context) error) error {
-	return nil
+	return f(ctx)
 }

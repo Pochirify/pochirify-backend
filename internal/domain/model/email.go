@@ -3,7 +3,7 @@ package model
 type EmailAddress string
 
 // TODO: validate
-func newEmailAddress(address string) (EmailAddress, error) {
+func NewEmailAddress(address string) (EmailAddress, error) {
 	return EmailAddress(address), nil
 }
 
