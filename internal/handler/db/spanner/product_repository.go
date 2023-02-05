@@ -77,6 +77,16 @@ func (r *productRepository) Find(ctx context.Context, id string) (*model.Product
 	return (*productEntity)(yo).toModel()
 }
 
+func (r *productRepository) Create(ctx context.Context, product *model.Product) error {
+	e := newProductEntity(product)
+	mutation := (*yo.Product)(e).Insert(ctx)
+	if _, err := r.ApplyMutations(ctx, []*spanner.Mutation{mutation}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *productRepository) Update(ctx context.Context, product *model.Product) error {
 	e := newProductEntity(product)
 	mutation := (*yo.Product)(e).Update(ctx)

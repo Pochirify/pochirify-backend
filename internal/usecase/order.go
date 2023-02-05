@@ -21,7 +21,7 @@ type CreateOrderInput struct {
 	ProductID     string
 	Quantity      int
 	PaymentMethod model.PaymentMethod
-	redirectURL   *string
+	RedirectURL   *string
 	UserID        *string
 	PhoneNumber   string
 
@@ -64,6 +64,7 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 		}
 	}
 
+	// TODO: userAddressをidで指定できる仕様いらなそう
 	var userAddress *model.UserAddress
 	if input.AddressID != nil {
 		userAddress, err = a.UserRepo.FindUserAddress(ctx, *input.AddressID)
@@ -102,7 +103,7 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 		input.ProductID,
 		totalPrice,
 	)
-	orderOutput, err := a.getOrderOutput(ctx, input.PaymentMethod, order.ID, totalPrice, input.redirectURL)
+	orderOutput, err := a.getOrderOutput(ctx, input.PaymentMethod, order.ID, totalPrice, input.RedirectURL)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", err, errCreateOrder)
 	}
@@ -118,10 +119,6 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 			return tErr
 		}
 
-		if tErr := a.OrderRepo.Create(ctx, order); tErr != nil {
-			return tErr
-		}
-
 		if input.UserID == nil {
 			if tErr := a.UserRepo.Create(ctx, user); tErr != nil {
 				return tErr
@@ -132,6 +129,11 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 				return tErr
 			}
 		}
+
+		if tErr := a.OrderRepo.Create(ctx, order); tErr != nil {
+			return tErr
+		}
+
 		return nil
 	})
 	if err != nil {

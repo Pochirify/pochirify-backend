@@ -7,14 +7,27 @@ DEV_DIR   := $(shell pwd)/dev
 BIN_DIR   := $(DEV_DIR)/bin
 TOOLS_DIR := $(DEV_DIR)/tools
 TOOLS_SUM := $(TOOLS_DIR)/go.sum
+
 YQ_VERSION := 4.14.1
 YO := $(abspath $(BIN_DIR)/yo)
+GQLGENC := $(abspath $(BIN_DIR)/gqlgenc)
+GQLGEN := $(abspath $(BIN_DIR)/gqlgen)
 BUILD_TOOLS := cd $(TOOLS_DIR) && go build -o
 
 .PHONY: yo
 yo: $(YO)
 $(YO): $(TOOLS_SUM)
 	@$(BUILD_TOOLS) $(YO) go.mercari.io/yo
+
+.PHONY: gqlgenc
+gqlgenc: $(GQLGENC)
+$(GQLGENC): $(TOOLS_SUM)
+	@$(BUILD_TOOLS) $(GQLGENC) github.com/Yamashou/gqlgenc
+
+.PHONY: gqlgen
+gqlgen: $(GQLGEN)
+$(GQLGEN): $(TOOLS_SUM)
+	@$(BUILD_TOOLS) $(GQLGEN) github.com/99designs/gqlgen
 
 # login: https://cloud.google.com/spanner/docs/getting-started/set-up?hl=ja
 pochirify-yo: $(YO)
@@ -24,8 +37,13 @@ pochirify-yo: $(YO)
 		pochirify-server \
 		--out ./internal/handler/db/spanner/yo
 
-gqlgen:
-	go run github.com/99designs/gqlgen generate
+pochirify-gqlgenc: $(GQLGENC)
+	@$(GQLGENC)
+
+pochirify-gqlgen: $(GQLGEN)
+	@$(GQLGEN)
+# gqlgen:
+# 	go run github.com/99designs/gqlgen generate
 
 up:
 	docker compose up
@@ -61,3 +79,7 @@ backend-deploy:
 		--update-env-vars PAYPAY_REDIRECT_URL=$(PAYPAY_REDIRECT_URL)
 
 backend-deploy-all: backend-image backend-registry backend-deploy
+
+.PHONY: e2etest
+e2etest:
+	go test -tags=e2e -shuffle=on ./e2etests/...

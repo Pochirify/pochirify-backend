@@ -22,6 +22,7 @@ func (p *Product) Bought() {
 	p.Stock--
 }
 
+// TODO: validate
 func (p Product) GetTotalPrice(quantity int) int {
 	return p.Price * quantity
 }
