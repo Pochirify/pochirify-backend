@@ -64,7 +64,9 @@ type Query {
 # input
 input createOrderInput {
   productID: String!
+  quantity: Int!
   paymentMethod: PaymentMethod!
+  redirectURL: String
   userID: String
   phoneNumber: String!
 
@@ -82,7 +84,7 @@ input createOrderInput {
 # mutation payload
 type createOrderPayload {
   orderID: String!
-  price: Int!
+  totalPrice: Int!
   orderResult: orderResult!
 }
 
@@ -98,5 +100,5 @@ type creditCardResult {
 union orderResult = paypayOrderResult | creditCardResult
 
 type Mutation {
-  createOrder(input: createOrderInput!): createOrderPayload
+  createOrder(input: createOrderInput!): createOrderPayload!
 }

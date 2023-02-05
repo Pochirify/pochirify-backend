@@ -15,7 +15,7 @@ func NewCreateOrderPayload(output *usecase.CreateOrderOutput) (*graphql.CreateOr
 
 	return &graphql.CreateOrderPayload{
 		OrderID:     output.OrderID,
-		Price:       output.Price,
+		TotalPrice:  output.TotalPrice,
 		OrderResult: orderResult,
 	}, nil
 }

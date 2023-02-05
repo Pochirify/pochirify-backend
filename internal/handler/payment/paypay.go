@@ -43,7 +43,7 @@ func NewPaypayClient(
 	}
 }
 
-func (r *paypayClient) CreateOrder(ctx context.Context, orderID string, price int) (*payment.PayPayOrder, error) {
+func (r *paypayClient) CreateOrder(ctx context.Context, orderID string, price int, redirectURL string) (*payment.PayPayOrder, error) {
 	cred := paypayopa.NewCredentials(
 		r.getEnv(),
 		r.apiKeyID,
@@ -59,7 +59,7 @@ func (r *paypayClient) CreateOrder(ctx context.Context, orderID string, price in
 			Currency: paypayopa.CurrencyJPY,
 		},
 		CodeType:     paypayopa.CodeTypeOrderQR,
-		RedirectURL:  r.redirectURL,
+		RedirectURL:  redirectURL,
 		RedirectType: paypayopa.RedirectTypeWebLink,
 	})
 	if err != nil {

@@ -9,6 +9,7 @@ import (
 func NewCreateOrderInput(i graphql.CreateOrderInput) *usecase.CreateOrderInput {
 	return &usecase.CreateOrderInput{
 		ProductID:     i.ProductID,
+		Quantity:      i.Quantity,
 		PaymentMethod: getPaymentMethod(i.PaymentMethod),
 		UserID:        i.UserID,
 		PhoneNumber:   i.PhoneNumber,

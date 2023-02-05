@@ -19,7 +19,9 @@ func (a App) PayPayTransactionEvent(ctx context.Context) error {
 
 type CreateOrderInput struct {
 	ProductID     string
+	Quantity      int
 	PaymentMethod model.PaymentMethod
+	redirectURL   *string
 	UserID        *string
 	PhoneNumber   string
 
@@ -36,7 +38,7 @@ type CreateOrderInput struct {
 
 type CreateOrderOutput struct {
 	OrderID     string
-	Price       int
+	TotalPrice  int
 	OrderOutput *OrderUnion
 }
 
@@ -46,6 +48,7 @@ type OrderUnion struct {
 	PayPayOrder     *payment.PayPayOrder
 }
 
+// TODO: どこかバグってるかもしれない。テスト作ってあとで調べる
 func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateOrderOutput, error) {
 	var user *model.User
 	var err error
@@ -85,11 +88,11 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 	}
 
 	// NOTE: 価格はここで確定する
-	var price int
+	var totalPrice int
 	if product, err := a.ProductRepo.Find(ctx, input.ProductID); err != nil {
 		return nil, fmt.Errorf("%s: %w", err, errCreateOrder)
 	} else {
-		price = product.Price
+		totalPrice = product.GetTotalPrice(input.Quantity)
 	}
 
 	order := model.NewOrder(
@@ -97,9 +100,9 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 		userAddress,
 		input.PaymentMethod,
 		input.ProductID,
-		price,
+		totalPrice,
 	)
-	orderOutput, err := a.getOrderOutput(ctx, input.PaymentMethod, order.ID, price)
+	orderOutput, err := a.getOrderOutput(ctx, input.PaymentMethod, order.ID, totalPrice, input.redirectURL)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", err, errCreateOrder)
 	}
@@ -137,7 +140,7 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 
 	return &CreateOrderOutput{
 		OrderID:     order.ID,
-		Price:       price,
+		TotalPrice:  totalPrice,
 		OrderOutput: orderOutput,
 	}, nil
 }
@@ -147,10 +150,17 @@ func (a App) getOrderOutput(
 	paymentMethod model.PaymentMethod,
 	orderID string,
 	price int,
+	redirectURL *string,
 ) (*OrderUnion, error) {
 	switch {
 	case paymentMethod.IsPayPay():
-		qr, err := a.paypayClient.CreateOrder(ctx, orderID, price)
+		if redirectURL == nil {
+			return nil, fmt.Errorf(
+				"failed to get orderOutput because redirectURL not provided. paymentMethod=%s",
+				paymentMethod.String(),
+			)
+		}
+		qr, err := a.paypayClient.CreateOrder(ctx, orderID, price, *redirectURL)
 		if err != nil {
 			return nil, err
 		}

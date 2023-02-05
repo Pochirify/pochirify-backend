@@ -94,7 +94,7 @@ type ComplexityRoot struct {
 	CreateOrderPayload struct {
 		OrderID     func(childComplexity int) int
 		OrderResult func(childComplexity int) int
-		Price       func(childComplexity int) int
+		TotalPrice  func(childComplexity int) int
 	}
 
 	CreditCardResult struct {
@@ -308,12 +308,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CreateOrderPayload.OrderResult(childComplexity), true
 
-	case "createOrderPayload.price":
-		if e.complexity.CreateOrderPayload.Price == nil {
+	case "createOrderPayload.totalPrice":
+		if e.complexity.CreateOrderPayload.TotalPrice == nil {
 			break
 		}
 
-		return e.complexity.CreateOrderPayload.Price(childComplexity), true
+		return e.complexity.CreateOrderPayload.TotalPrice(childComplexity), true
 
 	case "creditCardResult.accessID":
 		if e.complexity.CreditCardResult.AccessID == nil {
@@ -660,11 +660,14 @@ func (ec *executionContext) _Mutation_createOrder(ctx context.Context, field gra
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*graphql1.CreateOrderPayload)
 	fc.Result = res
-	return ec.marshalOcreateOrderPayload2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreateOrderPayload(ctx, field.Selections, res)
+	return ec.marshalNcreateOrderPayload2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreateOrderPayload(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createOrder(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -677,8 +680,8 @@ func (ec *executionContext) fieldContext_Mutation_createOrder(ctx context.Contex
 			switch field.Name {
 			case "orderID":
 				return ec.fieldContext_createOrderPayload_orderID(ctx, field)
-			case "price":
-				return ec.fieldContext_createOrderPayload_price(ctx, field)
+			case "totalPrice":
+				return ec.fieldContext_createOrderPayload_totalPrice(ctx, field)
 			case "orderResult":
 				return ec.fieldContext_createOrderPayload_orderResult(ctx, field)
 			}
@@ -3500,8 +3503,8 @@ func (ec *executionContext) fieldContext_createOrderPayload_orderID(ctx context.
 	return fc, nil
 }
 
-func (ec *executionContext) _createOrderPayload_price(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreateOrderPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_createOrderPayload_price(ctx, field)
+func (ec *executionContext) _createOrderPayload_totalPrice(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreateOrderPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_createOrderPayload_totalPrice(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3514,7 +3517,7 @@ func (ec *executionContext) _createOrderPayload_price(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Price, nil
+		return obj.TotalPrice, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3531,7 +3534,7 @@ func (ec *executionContext) _createOrderPayload_price(ctx context.Context, field
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_createOrderPayload_price(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_createOrderPayload_totalPrice(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "createOrderPayload",
 		Field:      field,
@@ -3731,7 +3734,7 @@ func (ec *executionContext) unmarshalInputcreateOrderInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"productID", "paymentMethod", "userID", "phoneNumber", "addressID", "emailAddress", "zipCode", "prefecture", "city", "streetAddress", "building", "lastName", "firstName"}
+	fieldsInOrder := [...]string{"productID", "quantity", "paymentMethod", "redirectURL", "userID", "phoneNumber", "addressID", "emailAddress", "zipCode", "prefecture", "city", "streetAddress", "building", "lastName", "firstName"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -3746,11 +3749,27 @@ func (ec *executionContext) unmarshalInputcreateOrderInput(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "quantity":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("quantity"))
+			it.Quantity, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "paymentMethod":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paymentMethod"))
 			it.PaymentMethod, err = ec.unmarshalNPaymentMethod2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐPaymentMethod(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "redirectURL":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("redirectURL"))
+			it.RedirectURL, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3967,6 +3986,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 				return ec._Mutation_createOrder(ctx, field)
 			})
 
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4593,9 +4615,9 @@ func (ec *executionContext) _createOrderPayload(ctx context.Context, sel ast.Sel
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "price":
+		case "totalPrice":
 
-			out.Values[i] = ec._createOrderPayload_price(ctx, field, obj)
+			out.Values[i] = ec._createOrderPayload_totalPrice(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -5157,6 +5179,20 @@ func (ec *executionContext) unmarshalNcreateOrderInput2githubᚗcomᚋPochirify�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNcreateOrderPayload2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreateOrderPayload(ctx context.Context, sel ast.SelectionSet, v graphql1.CreateOrderPayload) graphql.Marshaler {
+	return ec._createOrderPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNcreateOrderPayload2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreateOrderPayload(ctx context.Context, sel ast.SelectionSet, v *graphql1.CreateOrderPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._createOrderPayload(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNorderResult2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐOrderResult(ctx context.Context, sel ast.SelectionSet, v graphql1.OrderResult) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -5409,13 +5445,6 @@ func (ec *executionContext) marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return ec.___Type(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOcreateOrderPayload2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreateOrderPayload(ctx context.Context, sel ast.SelectionSet, v *graphql1.CreateOrderPayload) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._createOrderPayload(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

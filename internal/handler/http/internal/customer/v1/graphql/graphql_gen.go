@@ -51,7 +51,9 @@ type WebpPngImageURL struct {
 
 type CreateOrderInput struct {
 	ProductID     string        `json:"productID"`
+	Quantity      int           `json:"quantity"`
 	PaymentMethod PaymentMethod `json:"paymentMethod"`
+	RedirectURL   *string       `json:"redirectURL"`
 	UserID        *string       `json:"userID"`
 	PhoneNumber   string        `json:"phoneNumber"`
 	AddressID     *string       `json:"addressID"`
@@ -67,7 +69,7 @@ type CreateOrderInput struct {
 
 type CreateOrderPayload struct {
 	OrderID     string      `json:"orderID"`
-	Price       int         `json:"price"`
+	TotalPrice  int         `json:"totalPrice"`
 	OrderResult OrderResult `json:"orderResult"`
 }
 

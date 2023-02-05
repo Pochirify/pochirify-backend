@@ -21,3 +21,7 @@ type Product struct {
 func (p *Product) Bought() {
 	p.Stock--
 }
+
+func (p Product) GetTotalPrice(quantity int) int {
+	return p.Price * quantity
+}
