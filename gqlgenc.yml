@@ -1,0 +1,28 @@
+model:
+  package: gqlgenc
+  filename: ./e2etests/gqlgenc/models_gen.go
+client:
+  package: gqlgenc
+  filename: ./e2etests/gqlgenc/client.go
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+
+schema:
+  - "internal/handler/http/internal/customer/v1/schema/*.graphqls"
+query:
+  - "./e2etests/query/*.graphql"
+# endpoint:
+#   url:"http://localhost:8080/api/query"
+generate:
+  clientV2: true
+  clientInterfaceName: "GraphQLClient"

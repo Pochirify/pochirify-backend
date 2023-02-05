@@ -1,0 +1,21 @@
+query getAllActiveVariantGroupIDs {
+  allActiveVariantGroupIDs {
+    ids
+  }
+}
+
+mutation createOrder($input: createOrderInput!) {
+  createOrder(input: $input) {
+    orderID
+    totalPrice
+    orderResult {
+      ... on paypayOrderResult {
+        url
+      }
+      ... on creditCardResult {
+        cardOrderID
+        accessID
+      }
+    }
+  }
+}

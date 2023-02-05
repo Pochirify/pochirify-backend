@@ -11,6 +11,7 @@ func NewCreateOrderInput(i graphql.CreateOrderInput) *usecase.CreateOrderInput {
 		ProductID:     i.ProductID,
 		Quantity:      i.Quantity,
 		PaymentMethod: getPaymentMethod(i.PaymentMethod),
+		RedirectURL:   i.RedirectURL,
 		UserID:        i.UserID,
 		PhoneNumber:   i.PhoneNumber,
 		AddressID:     i.AddressID,
