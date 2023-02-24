@@ -12,6 +12,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 
+	"github.com/Pochirify/pochirify-backend/internal/domain/ec/shopify"
 	"github.com/Pochirify/pochirify-backend/internal/domain/payment"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/resolver"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/schema"
@@ -33,6 +34,7 @@ type Config struct {
 
 	PayPayClient     payment.PaypayClient
 	CreditCardClient payment.CreditCardClient
+	ShopifyClient    shopify.ShopifyClient
 }
 
 func NewServer(ctx context.Context, c *Config) *Server {
@@ -49,6 +51,7 @@ func NewServer(ctx context.Context, c *Config) *Server {
 	app := usecase.NewApp(&usecase.Config{
 		PaypayClient:     c.PayPayClient,
 		CreditCardClient: c.CreditCardClient,
+		ShopifyClient:    c.ShopifyClient,
 		Repositories:     repositories,
 	})
 
@@ -76,6 +79,7 @@ func (s *Server) Start() error {
 	return http.ListenAndServe(fmt.Sprintf(":%d", s.port), s.router)
 }
 
+// TODO: add configure traceID for logger
 func newLoggerFactory(l logger.Logger) logger.Factory {
 	return func(ctx context.Context) logger.Logger {
 		// md, ok := metadata.FromIncomingContext(ctx)

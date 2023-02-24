@@ -30,15 +30,15 @@ func newOrderEntity(m *model.Order) *orderEntity {
 	m.UpdateTime = now
 
 	return &orderEntity{
-		ID:            m.ID,
-		UserID:        m.UserID,
-		UserAddressID: m.UserAddressID,
+		ID: m.ID,
+		// UserID:        m.UserID,
+		// UserAddressID: m.UserAddressID,
 		Status:        m.Status.String(),
 		PaymentMethod: m.PaymentMethod.String(),
-		ProductID:     m.ProductID,
-		Price:         int64(m.Price),
-		CreateTime:    m.CreateTime,
-		UpdateTime:    m.UpdateTime,
+		// ProductID:     m.ProductID,
+		// Price:         int64(m.Price),
+		CreateTime: m.CreateTime,
+		UpdateTime: m.UpdateTime,
 	}
 }
 

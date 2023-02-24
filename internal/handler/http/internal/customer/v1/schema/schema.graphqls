@@ -14,6 +14,7 @@ enum PaymentMethod {
   APPLE_PAY
   GOOGLE_PAY
 }
+# TODO: define Uint32
 
 type Product {
   id: ID!
@@ -63,14 +64,13 @@ type Query {
 
 # input
 input createOrderInput {
-  productID: String!
+  productVariantID: String!
+  unitPrice: Int!
   quantity: Int!
   paymentMethod: PaymentMethod!
   redirectURL: String
-  userID: String
   phoneNumber: String!
 
-  addressID: String
   emailAddress: String!
   zipCode: Int!
   prefecture: String!

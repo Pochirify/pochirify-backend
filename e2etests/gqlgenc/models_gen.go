@@ -50,21 +50,20 @@ type WebpPngImageURL struct {
 }
 
 type CreateOrderInput struct {
-	ProductID     string        `json:"productID"`
-	Quantity      int           `json:"quantity"`
-	PaymentMethod PaymentMethod `json:"paymentMethod"`
-	RedirectURL   *string       `json:"redirectURL,omitempty"`
-	UserID        *string       `json:"userID,omitempty"`
-	PhoneNumber   string        `json:"phoneNumber"`
-	AddressID     *string       `json:"addressID,omitempty"`
-	EmailAddress  string        `json:"emailAddress"`
-	ZipCode       int           `json:"zipCode"`
-	Prefecture    string        `json:"prefecture"`
-	City          string        `json:"city"`
-	StreetAddress string        `json:"streetAddress"`
-	Building      *string       `json:"building,omitempty"`
-	LastName      string        `json:"lastName"`
-	FirstName     string        `json:"firstName"`
+	ProductVariantID string        `json:"productVariantID"`
+	UnitPrice        int           `json:"unitPrice"`
+	Quantity         int           `json:"quantity"`
+	PaymentMethod    PaymentMethod `json:"paymentMethod"`
+	RedirectURL      *string       `json:"redirectURL,omitempty"`
+	PhoneNumber      string        `json:"phoneNumber"`
+	EmailAddress     string        `json:"emailAddress"`
+	ZipCode          int           `json:"zipCode"`
+	Prefecture       string        `json:"prefecture"`
+	City             string        `json:"city"`
+	StreetAddress    string        `json:"streetAddress"`
+	Building         *string       `json:"building,omitempty"`
+	LastName         string        `json:"lastName"`
+	FirstName        string        `json:"firstName"`
 }
 
 type CreateOrderPayload struct {

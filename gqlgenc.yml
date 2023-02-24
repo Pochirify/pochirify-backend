@@ -17,8 +17,11 @@ models:
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
 
-schema:
-  - "internal/handler/http/internal/customer/v1/schema/*.graphqls"
+# schema:
+#   - "internal/handler/http/internal/customer/v1/schema/*.graphqls"
+endpoint: 
+  # url: "https://api.github.com/graphql"
+  url: "http://localhost:8080/api/query"
 query:
   - "./e2etests/query/*.graphql"
 # endpoint:
