@@ -3728,18 +3728,26 @@ func (ec *executionContext) unmarshalInputcreateOrderInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"productID", "quantity", "paymentMethod", "redirectURL", "userID", "phoneNumber", "addressID", "emailAddress", "zipCode", "prefecture", "city", "streetAddress", "building", "lastName", "firstName"}
+	fieldsInOrder := [...]string{"productVariantID", "unitPrice", "quantity", "paymentMethod", "redirectURL", "phoneNumber", "emailAddress", "zipCode", "prefecture", "city", "streetAddress", "building", "lastName", "firstName"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "productID":
+		case "productVariantID":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
-			it.ProductID, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productVariantID"))
+			it.ProductVariantID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "unitPrice":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("unitPrice"))
+			it.UnitPrice, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3767,27 +3775,11 @@ func (ec *executionContext) unmarshalInputcreateOrderInput(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
-		case "userID":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
-			it.UserID, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "phoneNumber":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phoneNumber"))
 			it.PhoneNumber, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "addressID":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("addressID"))
-			it.AddressID, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}

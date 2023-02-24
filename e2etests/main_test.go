@@ -41,6 +41,12 @@ func TestMain(m *testing.M) {
 		databaseID = "pochirify-server"
 	}
 
+	// TODO: 
+	if err := os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "../credential/kounosuke.json"); err != nil {
+		log.Println("failed to set GOOGLE_APPLICATION_CREDENTIALS")
+		os.Exit(1)
+	}
+
 	// // TODO: we should manipulate env based on e2etest mode
 	// credentials := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
 	// if err := exec.Command("sh", "-c", fmt.Sprintf("export GOOGLE_APPLICATION_CREDENTIALS=.%s", credentials)).Run(); err != nil {

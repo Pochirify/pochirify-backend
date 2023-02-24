@@ -7,22 +7,22 @@ import (
 )
 
 func NewCreateOrderInput(i graphql.CreateOrderInput) *usecase.CreateOrderInput {
+	// TODO: validate uint or define uint as scaler
 	return &usecase.CreateOrderInput{
-		ProductID:     i.ProductID,
-		Quantity:      i.Quantity,
-		PaymentMethod: getPaymentMethod(i.PaymentMethod),
-		RedirectURL:   i.RedirectURL,
-		UserID:        i.UserID,
-		PhoneNumber:   i.PhoneNumber,
-		AddressID:     i.AddressID,
-		EmailAddress:  i.EmailAddress,
-		ZipCode:       i.ZipCode,
-		Prefecture:    i.Prefecture,
-		City:          i.City,
-		StreetAddress: i.StreetAddress,
-		Building:      i.Building,
-		LastName:      i.LastName,
-		FirstName:     i.FirstName,
+		ProductVariantID: i.ProductVariantID,
+		UnitPrice:        uint(i.UnitPrice),
+		Quantity:         uint(i.Quantity),
+		PaymentMethod:    getPaymentMethod(i.PaymentMethod),
+		RedirectURL:      i.RedirectURL,
+		PhoneNumber:      i.PhoneNumber,
+		EmailAddress:     i.EmailAddress,
+		ZipCode:          uint(i.ZipCode),
+		Prefecture:       i.Prefecture,
+		City:             i.City,
+		StreetAddress:    i.StreetAddress,
+		Building:         i.Building,
+		LastName:         i.LastName,
+		FirstName:        i.FirstName,
 	}
 }
 

@@ -1,6 +1,7 @@
 ---
 version: "3.8"
 
+# TODO: add spanner emulator
 services:
   app:
     build:
@@ -23,6 +24,8 @@ services:
       PAYPAY_API_SECRET: "${PAYPAY_API_SECRET}"
       PAYPAY_MERCHANT_ID: "${PAYPAY_MERCHANT_ID}"
       PAYPAY_REDIRECT_URL: "${PAYPAY_REDIRECT_URL}"
+
+      SHOPIFY_ADMIN_ACCESS_TOKEN: "${SHOPIFY_ADMIN_ACCESS_TOKEN}"
 
       GOOGLE_APPLICATION_CREDENTIALS: "${GOOGLE_APPLICATION_CREDENTIALS}"
     working_dir: /go/src/github.com/Pochirify/pochirify-backend

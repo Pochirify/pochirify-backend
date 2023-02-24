@@ -17,8 +17,10 @@ type environments struct {
 	PayPayApiKeyID     string `envconfig:"PAYPAY_API_KEY_ID" required:"true"`
 	PayPayApiSecret    string `envconfig:"PAYPAY_API_SECRET" required:"true"`
 	PayPayMerchantID   string `envconfig:"PAYPAY_MERCHANT_ID" required:"true"`
-	// TODO: 多分修正必要
+	// TODO: いらん
 	PayPayRedirectURL string `envconfig:"PAYPAY_REDIRECT_URL" required:"true"`
+
+	ShopifyAdminAccessToken string `envconfig:"SHOPIFY_ADMIN_ACCESS_TOKEN" required:"true"`
 }
 
 func getEnvironments() (*environments, error) {
