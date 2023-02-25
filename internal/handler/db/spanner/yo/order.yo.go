@@ -13,15 +13,15 @@ import (
 
 // Order represents a row from 'Orders'.
 type Order struct {
-	ID            string    `spanner:"ID" json:"ID"`                       // ID
-	UserID        string    `spanner:"UserID" json:"UserID"`               // UserID
-	UserAddressID string    `spanner:"UserAddressID" json:"UserAddressID"` // UserAddressID
-	Status        string    `spanner:"Status" json:"Status"`               // Status
-	PaymentMethod string    `spanner:"PaymentMethod" json:"PaymentMethod"` // PaymentMethod
-	ProductID     string    `spanner:"ProductID" json:"ProductID"`         // ProductID
-	Price         int64     `spanner:"Price" json:"Price"`                 // Price
-	CreateTime    time.Time `spanner:"CreateTime" json:"CreateTime"`       // CreateTime
-	UpdateTime    time.Time `spanner:"UpdateTime" json:"UpdateTime"`       // UpdateTime
+	ID               string    `spanner:"ID" json:"ID"`                             // ID
+	ShopifyOrderID   int64     `spanner:"ShopifyOrderID" json:"ShopifyOrderID"`     // ShopifyOrderID
+	Status           string    `spanner:"Status" json:"Status"`                     // Status
+	PaymentMethod    string    `spanner:"PaymentMethod" json:"PaymentMethod"`       // PaymentMethod
+	ProductVariantID int64     `spanner:"ProductVariantID" json:"ProductVariantID"` // ProductVariantID
+	UnitPrice        int64     `spanner:"UnitPrice" json:"UnitPrice"`               // UnitPrice
+	Quantity         int64     `spanner:"Quantity" json:"Quantity"`                 // Quantity
+	CreateTime       time.Time `spanner:"CreateTime" json:"CreateTime"`             // CreateTime
+	UpdateTime       time.Time `spanner:"UpdateTime" json:"UpdateTime"`             // UpdateTime
 }
 
 func OrderPrimaryKeys() []string {
@@ -33,12 +33,12 @@ func OrderPrimaryKeys() []string {
 func OrderColumns() []string {
 	return []string{
 		"ID",
-		"UserID",
-		"UserAddressID",
+		"ShopifyOrderID",
 		"Status",
 		"PaymentMethod",
-		"ProductID",
-		"Price",
+		"ProductVariantID",
+		"UnitPrice",
+		"Quantity",
 		"CreateTime",
 		"UpdateTime",
 	}
@@ -47,12 +47,12 @@ func OrderColumns() []string {
 func OrderWritableColumns() []string {
 	return []string{
 		"ID",
-		"UserID",
-		"UserAddressID",
+		"ShopifyOrderID",
 		"Status",
 		"PaymentMethod",
-		"ProductID",
-		"Price",
+		"ProductVariantID",
+		"UnitPrice",
+		"Quantity",
 		"CreateTime",
 		"UpdateTime",
 	}
@@ -69,18 +69,18 @@ func (o *Order) columnsToPtrs(cols []string, customPtrs map[string]interface{}) 
 		switch col {
 		case "ID":
 			ret = append(ret, &o.ID)
-		case "UserID":
-			ret = append(ret, &o.UserID)
-		case "UserAddressID":
-			ret = append(ret, &o.UserAddressID)
+		case "ShopifyOrderID":
+			ret = append(ret, &o.ShopifyOrderID)
 		case "Status":
 			ret = append(ret, &o.Status)
 		case "PaymentMethod":
 			ret = append(ret, &o.PaymentMethod)
-		case "ProductID":
-			ret = append(ret, &o.ProductID)
-		case "Price":
-			ret = append(ret, &o.Price)
+		case "ProductVariantID":
+			ret = append(ret, &o.ProductVariantID)
+		case "UnitPrice":
+			ret = append(ret, &o.UnitPrice)
+		case "Quantity":
+			ret = append(ret, &o.Quantity)
 		case "CreateTime":
 			ret = append(ret, &o.CreateTime)
 		case "UpdateTime":
@@ -98,18 +98,18 @@ func (o *Order) columnsToValues(cols []string) ([]interface{}, error) {
 		switch col {
 		case "ID":
 			ret = append(ret, o.ID)
-		case "UserID":
-			ret = append(ret, o.UserID)
-		case "UserAddressID":
-			ret = append(ret, o.UserAddressID)
+		case "ShopifyOrderID":
+			ret = append(ret, o.ShopifyOrderID)
 		case "Status":
 			ret = append(ret, o.Status)
 		case "PaymentMethod":
 			ret = append(ret, o.PaymentMethod)
-		case "ProductID":
-			ret = append(ret, o.ProductID)
-		case "Price":
-			ret = append(ret, o.Price)
+		case "ProductVariantID":
+			ret = append(ret, o.ProductVariantID)
+		case "UnitPrice":
+			ret = append(ret, o.UnitPrice)
+		case "Quantity":
+			ret = append(ret, o.Quantity)
 		case "CreateTime":
 			ret = append(ret, o.CreateTime)
 		case "UpdateTime":

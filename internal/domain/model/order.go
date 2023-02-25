@@ -29,12 +29,12 @@ const (
 
 type Order struct {
 	ID             string // shopify order id
-	ShopifyOrderID string
+	ShopifyOrderID uint
 	// UserID        string
 	// UserAddressID string
 	Status           PaymentStatus
 	PaymentMethod    PaymentMethod
-	ProductVariantID string
+	ProductVariantID uint
 	UnitPrice        uint
 	Quantity         uint
 
@@ -44,7 +44,7 @@ type Order struct {
 
 func NewOrder(
 	paymentMethod PaymentMethod,
-	productVariantID string,
+	productVariantID,
 	unitPrice uint,
 	quantity uint,
 ) (*Order, error) {
@@ -61,8 +61,13 @@ func NewOrder(
 	}, nil
 }
 
-func (o *Order) SetShopifyOrderID(shopifyOrderID string) {
+func (o *Order) Update(shopifyOrderID, totalPrice uint) {
 	o.ShopifyOrderID = shopifyOrderID
+	o.UnitPrice = totalPrice / o.Quantity
+}
+
+func (o Order) GetTotalPrice() uint {
+	return o.UnitPrice * o.Quantity
 }
 
 func (m PaymentMethod) IsPayPay() bool {
@@ -88,6 +93,21 @@ func (m PaymentMethod) String() string {
 	}
 }
 
+func GetPaymentMethod(pm string) PaymentMethod {
+	switch pm {
+	case "card":
+		return PaymentMethodCard
+	case "paypay":
+		return PaymentMethodPayPay
+	case "apple_pay":
+		return PaymentMethodApplePay
+	case "google_pay":
+		return PaymentMethodGooglePay
+	default:
+		return PaymentMethodUnknown
+	}
+}
+
 func (s PaymentStatus) String() string {
 	switch s {
 	case PaymentStatusPending:
@@ -99,4 +119,21 @@ func (s PaymentStatus) String() string {
 	default:
 		return "unknown"
 	}
+}
+
+func GetOrderPaymentStatus(ps string) PaymentStatus {
+	switch ps {
+	case "pending":
+		return PaymentStatusPending
+	case "completed":
+		return PaymentStatusCompleted
+	case "canceled":
+		return PaymentStatusCanceled
+	default:
+		return PaymentStatusUnknown
+	}
+}
+
+func (o *Order) AsPaid() {
+	o.Status = PaymentStatusCompleted
 }

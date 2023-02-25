@@ -5,14 +5,17 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"testing"
 
 	"github.com/Pochirify/pochirify-backend/internal/handler/db/spanner"
 	appspanner "github.com/Pochirify/pochirify-backend/internal/handler/db/spanner"
 	"github.com/Pochirify/pochirify-backend/internal/handler/logger"
 	"github.com/Pochirify/pochirify-backend/internal/handler/logger/json"
+	"github.com/Yamashou/gqlgenc/clientv2"
 
 	"github.com/Pochirify/pochirify-backend/e2etests/gqlgenc"
+	shopify "github.com/Pochirify/pochirify-backend/e2etests/shopify/gqlgenc"
 	"github.com/Pochirify/pochirify-backend/internal/domain/repository"
 )
 
@@ -20,6 +23,17 @@ func newClient(_ *testing.T) gqlgenc.GraphQLClient {
 	return gqlgenc.NewClient(
 		http.DefaultClient,
 		"http://localhost:"+port+"/api/query",
+	)
+}
+
+func newShopifyClient(_ *testing.T) shopify.ShopifyClient {
+	return shopify.NewClient(
+		http.DefaultClient,
+		"https://kounosuke-test.myshopify.com/admin/api/2023-01/graphql.json",
+		func(ctx context.Context, req *http.Request, gqlInfo *clientv2.GQLRequestInfo, res interface{}, next clientv2.RequestInterceptorFunc) error {
+			req.Header.Add("X-Shopify-Access-Token", shopifyAccessToken)
+			return next(ctx, req, gqlInfo, res)
+		},
 	)
 }
 
@@ -47,4 +61,8 @@ func newLoggerFactory() logger.Factory {
 	return func(ctx context.Context) logger.Logger {
 		return l
 	}
+}
+
+func newShopifyOrderGID(shopifyOrderID uint) string {
+	return "gid://shopify/Order/" + strconv.Itoa(int(shopifyOrderID))
 }

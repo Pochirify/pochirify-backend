@@ -64,7 +64,7 @@ type Query {
 
 # input
 input createOrderInput {
-  productVariantID: String!
+  productVariantID: Int!
   unitPrice: Int!
   quantity: Int!
   paymentMethod: PaymentMethod!
@@ -88,6 +88,10 @@ type createOrderPayload {
   orderResult: orderResult!
 }
 
+type completeOrderPayload {
+  shopifyActivationURL: String
+}
+
 type paypayOrderResult {
   url: String!
 }
@@ -101,4 +105,5 @@ union orderResult = paypayOrderResult | creditCardResult
 
 type Mutation {
   createOrder(input: createOrderInput!): createOrderPayload!
+  completeOrder(id: String!): completeOrderPayload!
 }

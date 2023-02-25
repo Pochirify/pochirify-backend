@@ -49,8 +49,12 @@ type WebpPngImageURL struct {
 	PngURL  string `json:"pngURL"`
 }
 
+type CompleteOrderPayload struct {
+	ShopifyActivationURL *string `json:"shopifyActivationURL"`
+}
+
 type CreateOrderInput struct {
-	ProductVariantID string        `json:"productVariantID"`
+	ProductVariantID int           `json:"productVariantID"`
 	UnitPrice        int           `json:"unitPrice"`
 	Quantity         int           `json:"quantity"`
 	PaymentMethod    PaymentMethod `json:"paymentMethod"`

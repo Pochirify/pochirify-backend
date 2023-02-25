@@ -13,44 +13,69 @@ import (
 
 const existingProductVariantID = "44501604106551"
 
-func TestCreateOrder_Normal(t *testing.T) {
-	client := newClient(t)
-	ctx := context.Background()
+func defaultCreateOrder(
+	t *testing.T,
+	client gqlgenc.GraphQLClient,
+	ctx context.Context,
+	emailAddress string,
+	redirectURL *string,
+) (*gqlgenc.CreateOrder, error) {
+	t.Helper()
 
 	var (
-		redirectURL  = "https://example.com"
-		phoneNumber  = "08011112222"
-		emailAddress = uuid.NewString() + "@example.com"
+		phoneNumber = "08011112222"
 	)
 
+	return client.CreateOrder(
+		ctx,
+		gqlgenc.CreateOrderInput{
+			ProductVariantID: existingProductVariantID,
+			UnitPrice:        10,
+			Quantity:         2,
+			PaymentMethod:    gqlgenc.PaymentMethodPaypay,
+			RedirectURL:      redirectURL,
+			PhoneNumber:      phoneNumber,
+			EmailAddress:     emailAddress,
+			ZipCode:          1300013,
+			Prefecture:       "東京都",
+			City:             "墨田区",
+			StreetAddress:    "錦糸1-2",
+			Building:         nil,
+			LastName:         "山田",
+			FirstName:        "太郎",
+		},
+	)
+}
+
+func TestCreateOrder_Normal(t *testing.T) {
+	client := newClient(t)
+	shopifyClient := newShopifyClient(t)
+	ctx := context.Background()
+	redirectURL := "https://example.com"
+
 	t.Run("create a order using paypay", func(t *testing.T) {
-		res, err := client.CreateOrder(
-			ctx,
-			gqlgenc.CreateOrderInput{
-				ProductVariantID: existingProductVariantID,
-				UnitPrice:        10,
-				Quantity:         2,
-				PaymentMethod:    gqlgenc.PaymentMethodPaypay,
-				RedirectURL:      &redirectURL,
-				PhoneNumber:      phoneNumber,
-				EmailAddress:     emailAddress,
-				ZipCode:          1300013,
-				Prefecture:       "東京都",
-				City:             "墨田区",
-				StreetAddress:    "錦糸1-2",
-				Building:         nil,
-				LastName:         "山田",
-				FirstName:        "太郎",
-			},
-		)
+		emailAddress := uuid.NewString() + "@example.com"
+
+		// run
+		res, err := defaultCreateOrder(t, client, ctx, emailAddress, &redirectURL)
 		require.NoError(t, err)
-		assert.NotEqual(t, "", res.CreateOrder.OrderID)
+		require.NotEqual(t, "", res.CreateOrder.OrderID)
 		assert.Equal(t, 20, res.CreateOrder.TotalPrice)
 		require.NotNil(t, res.CreateOrder.OrderResult)
 		require.NotNil(t, res.CreateOrder.OrderResult.PaypayOrderResult)
 		assert.Equal(t, redirectURL, res.CreateOrder.OrderResult.PaypayOrderResult.URL)
 
-		// TODO: check order record
+		// check data
+		order, err := repositories.OrderRepo.Find(ctx, res.CreateOrder.OrderID)
+		require.NoError(t, err)
+		shopifyOrderGID := newShopifyOrderGID(order.ShopifyOrderID)
+		orderRes, err := shopifyClient.GetOrder(ctx, shopifyOrderGID)
+		require.NoError(t, err)
+		require.NotNil(t, orderRes.Order)
+		require.NotEqual(t, "", orderRes.Order.ID)
+		assert.Equal(t, emailAddress, *orderRes.Order.Email)
+		assert.Equal(t, "PENDING", orderRes.Order.DisplayFinancialStatus.String())
+
 		// TODO: check paypay order is properly created
 	})
 
@@ -58,5 +83,6 @@ func TestCreateOrder_Normal(t *testing.T) {
 
 	t.Run("create a order, but total price has been changed by shopify", func(t *testing.T) {})
 
+	// TODO:
 	t.Run("failed to create a order, because inventory is empty", func(t *testing.T) {})
 }
