@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/Pochirify/pochirify-backend/internal/domain/ec/shopify"
 	"github.com/Pochirify/pochirify-backend/internal/domain/model"
@@ -83,7 +82,6 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 	}
 	isPriceChanged := order.GetTotalPrice() != payload.TotalPrice
 
-	log.Println(payload)
 	order.Update(uint(payload.ShopifyOrderID), payload.TotalPrice)
 	if err = a.OrderRepo.Create(ctx, order); err != nil {
 		return nil, err
