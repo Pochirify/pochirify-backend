@@ -19,3 +19,9 @@ mutation createOrder($input: createOrderInput!) {
     }
   }
 }
+
+mutation completeOrder($id: String!) {
+  completeOrder(id: $id) {
+    shopifyActivationURL
+  }
+}

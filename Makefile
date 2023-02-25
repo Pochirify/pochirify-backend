@@ -40,6 +40,10 @@ pochirify-yo: $(YO)
 pochirify-gqlgenc: $(GQLGENC)
 	@$(GQLGENC)
 
+# TODO: --configdir効かせる
+# shopify-gqlgenc: $(GQLGENC)
+# @$(GQLGENC) generate --configdir ./e2etests/shopify
+
 pochirify-gqlgen: $(GQLGEN)
 	@$(GQLGEN)
 # gqlgen:

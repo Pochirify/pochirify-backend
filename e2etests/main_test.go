@@ -11,11 +11,12 @@ import (
 )
 
 var (
-	port         string
-	projectID    string
-	instanceID   string
-	databaseID   string
-	repositories repository.Repositories
+	port               string
+	projectID          string
+	instanceID         string
+	databaseID         string
+	shopifyAccessToken string
+	repositories       repository.Repositories
 )
 
 func TestMain(m *testing.M) {
@@ -40,8 +41,12 @@ func TestMain(m *testing.M) {
 	if databaseID == "" {
 		databaseID = "pochirify-server"
 	}
+	shopifyAccessToken = os.Getenv("SHOPIFY_ADMIN_ACCESS_TOKEN")
+	if shopifyAccessToken == "" {
+		log.Println("shopify access token not provided")
+	}
 
-	// TODO: 
+	// TODO:
 	if err := os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "../credential/kounosuke.json"); err != nil {
 		log.Println("failed to set GOOGLE_APPLICATION_CREDENTIALS")
 		os.Exit(1)

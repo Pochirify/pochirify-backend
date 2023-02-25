@@ -3,7 +3,9 @@ package usecase
 import (
 	"context"
 	"errors"
+	"fmt"
 
+	"github.com/Pochirify/pochirify-backend/internal/domain/ec/shopify"
 	"github.com/Pochirify/pochirify-backend/internal/domain/model"
 	"github.com/Pochirify/pochirify-backend/internal/domain/payment"
 )
@@ -17,7 +19,7 @@ func (a App) PayPayTransactionEvent(ctx context.Context) error {
 }
 
 type CreateOrderInput struct {
-	ProductVariantID string
+	ProductVariantID uint
 	UnitPrice        uint
 	Quantity         uint
 	PaymentMethod    model.PaymentMethod
@@ -36,9 +38,10 @@ type CreateOrderInput struct {
 
 type CreateOrderOutput struct {
 	// TODO: add other
-	OrderID     string
-	TotalPrice  uint
-	OrderOutput *OrderUnion
+	OrderID        string
+	TotalPrice     uint
+	IsPriceChanged bool
+	OrderOutput    *OrderUnion
 }
 
 type OrderUnion struct {
@@ -72,20 +75,71 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 	if err != nil {
 		return nil, err
 	}
-	payload, err := a.shopifyClient.CreateOrder(ctx, order, shippingAddress)
+	payload, err := a.shopifyClient.CreatePendingOrder(ctx, input.Quantity, input.ProductVariantID, shippingAddress)
+	// TODO: handle inventory
 	if err != nil {
 		return nil, err
 	}
+	isPriceChanged := order.GetTotalPrice() != payload.TotalPrice
 
-	// _, err := a.shopifyClient.CreateOrder()
+	order.Update(uint(payload.ShopifyOrderID), payload.TotalPrice)
+	if err = a.OrderRepo.Create(ctx, order); err != nil {
+		return nil, err
+	}
+
 	return &CreateOrderOutput{
-		OrderID:    order.ID,
-		TotalPrice: payload.TotalPrice,
+		OrderID:        order.ID,
+		TotalPrice:     order.GetTotalPrice(),
+		IsPriceChanged: isPriceChanged,
 		OrderOutput: &OrderUnion{
 			PayPayOrder: &payment.PayPayOrder{
 				URL: *input.RedirectURL,
 			},
 		},
+	}, nil
+}
+
+type CompleteOrderOutput struct {
+	ShopifyActivationURL *string
+}
+
+func (a App) CompleteOrder(ctx context.Context, id string) (*CompleteOrderOutput, error) {
+	order, err := a.OrderRepo.Find(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find order: %w", err)
+	}
+
+	shopifyOrderGID, err := a.shopifyClient.MarkOrderAsPaid(ctx, order.ShopifyOrderID)
+	if err != nil {
+		switch {
+		case errors.Is(err, shopify.ErrGetShopifyActivationURLAlreadyActivated):
+			break
+		default:
+			return nil, fmt.Errorf("failed to mark order as paid: %w", err)
+		}
+	}
+
+	url, err := a.shopifyClient.GetShopifyActivationURL(ctx, shopifyOrderGID)
+	if err != nil {
+		switch {
+		case errors.Is(err, shopify.ErrGetShopifyActivationURLAlreadyActivated):
+			break
+		default:
+			return nil, fmt.Errorf("failed to get shopify activation url: %w", err)
+		}
+	}
+
+	order.AsPaid()
+	if err := a.OrderRepo.Update(ctx, order); err != nil {
+		return nil, fmt.Errorf("failed to update order: %w", err)
+	}
+
+	var activationURl *string
+	if url != "" {
+		activationURl = &url
+	}
+	return &CompleteOrderOutput{
+		ShopifyActivationURL: activationURl,
 	}, nil
 }
 

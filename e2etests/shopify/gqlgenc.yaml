@@ -1,0 +1,30 @@
+model:
+  package: shopify
+  filename: ./gqlgenc/models_gen.go
+client:
+  package: shopify
+  filename: ./gqlgenc/client.go
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+
+endpoint:
+  url: "https://kounosuke-test.myshopify.com/admin/api/2023-01/graphql.json"
+  headers:
+    X-Shopify-Access-Token: "${SHOPIFY_ADMIN_ACCESS_TOKEN}"
+
+query:
+  - "./query/*.graphql"
+
+generate:
+  clientV2: true
+  clientInterfaceName: "ShopifyClient"

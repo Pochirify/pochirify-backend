@@ -6,6 +6,7 @@ package resolver
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	graphql1 "github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/graphql"
@@ -31,6 +32,18 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, input graphql1.Creat
 	}
 
 	return payload, nil
+}
+
+// CompleteOrder is the resolver for the completeOrder field.
+func (r *mutationResolver) CompleteOrder(ctx context.Context, id string) (*graphql1.CompleteOrderPayload, error) {
+	output, err := r.App.CompleteOrder(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to complete order: %w", err)
+	}
+
+	return &graphql1.CompleteOrderPayload{
+		ShopifyActivationURL: output.ShopifyActivationURL,
+	}, nil
 }
 
 // VariantGroupDetail is the resolver for the variantGroupDetail field.

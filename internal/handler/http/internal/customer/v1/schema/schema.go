@@ -54,7 +54,8 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateOrder func(childComplexity int, input graphql1.CreateOrderInput) int
+		CompleteOrder func(childComplexity int, id string) int
+		CreateOrder   func(childComplexity int, input graphql1.CreateOrderInput) int
 	}
 
 	Product struct {
@@ -90,6 +91,10 @@ type ComplexityRoot struct {
 		WebpURL func(childComplexity int) int
 	}
 
+	CompleteOrderPayload struct {
+		ShopifyActivationURL func(childComplexity int) int
+	}
+
 	CreateOrderPayload struct {
 		OrderID     func(childComplexity int) int
 		OrderResult func(childComplexity int) int
@@ -108,6 +113,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateOrder(ctx context.Context, input graphql1.CreateOrderInput) (*graphql1.CreateOrderPayload, error)
+	CompleteOrder(ctx context.Context, id string) (*graphql1.CompleteOrderPayload, error)
 }
 type QueryResolver interface {
 	VariantGroupDetail(ctx context.Context, id string) (*graphql1.VariantGroupDetail, error)
@@ -149,6 +155,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DeliveryTimeRange.To(childComplexity), true
+
+	case "Mutation.completeOrder":
+		if e.complexity.Mutation.CompleteOrder == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_completeOrder_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CompleteOrder(childComplexity, args["id"].(string)), true
 
 	case "Mutation.createOrder":
 		if e.complexity.Mutation.CreateOrder == nil {
@@ -293,6 +311,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.WebpPngImageURL.WebpURL(childComplexity), true
 
+	case "completeOrderPayload.shopifyActivationURL":
+		if e.complexity.CompleteOrderPayload.ShopifyActivationURL == nil {
+			break
+		}
+
+		return e.complexity.CompleteOrderPayload.ShopifyActivationURL(childComplexity), true
+
 	case "createOrderPayload.orderID":
 		if e.complexity.CreateOrderPayload.OrderID == nil {
 			break
@@ -422,6 +447,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_completeOrder_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createOrder_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -694,6 +734,64 @@ func (ec *executionContext) fieldContext_Mutation_createOrder(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_createOrder_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_completeOrder(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_completeOrder(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CompleteOrder(rctx, fc.Args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphql1.CompleteOrderPayload)
+	fc.Result = res
+	return ec.marshalNcompleteOrderPayload2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCompleteOrderPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_completeOrder(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "shopifyActivationURL":
+				return ec.fieldContext_completeOrderPayload_shopifyActivationURL(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type completeOrderPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_completeOrder_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -3453,6 +3551,47 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _completeOrderPayload_shopifyActivationURL(ctx context.Context, field graphql.CollectedField, obj *graphql1.CompleteOrderPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_completeOrderPayload_shopifyActivationURL(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ShopifyActivationURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_completeOrderPayload_shopifyActivationURL(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "completeOrderPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _createOrderPayload_orderID(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreateOrderPayload) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_createOrderPayload_orderID(ctx, field)
 	if err != nil {
@@ -3739,7 +3878,7 @@ func (ec *executionContext) unmarshalInputcreateOrderInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productVariantID"))
-			it.ProductVariantID, err = ec.unmarshalNString2string(ctx, v)
+			it.ProductVariantID, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3969,6 +4108,12 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createOrder(ctx, field)
+			})
+
+		case "completeOrder":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_completeOrder(ctx, field)
 			})
 
 		default:
@@ -4567,6 +4712,31 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
+var completeOrderPayloadImplementors = []string{"completeOrderPayload"}
+
+func (ec *executionContext) _completeOrderPayload(ctx context.Context, sel ast.SelectionSet, obj *graphql1.CompleteOrderPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, completeOrderPayloadImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("completeOrderPayload")
+		case "shopifyActivationURL":
+
+			out.Values[i] = ec._completeOrderPayload_shopifyActivationURL(ctx, field, obj)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var createOrderPayloadImplementors = []string{"createOrderPayload"}
 
 func (ec *executionContext) _createOrderPayload(ctx context.Context, sel ast.SelectionSet, obj *graphql1.CreateOrderPayload) graphql.Marshaler {
@@ -5141,6 +5311,20 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNcompleteOrderPayload2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCompleteOrderPayload(ctx context.Context, sel ast.SelectionSet, v graphql1.CompleteOrderPayload) graphql.Marshaler {
+	return ec._completeOrderPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNcompleteOrderPayload2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCompleteOrderPayload(ctx context.Context, sel ast.SelectionSet, v *graphql1.CompleteOrderPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._completeOrderPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNcreateOrderInput2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreateOrderInput(ctx context.Context, v interface{}) (graphql1.CreateOrderInput, error) {

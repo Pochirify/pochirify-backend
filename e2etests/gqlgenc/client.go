@@ -12,6 +12,7 @@ import (
 type GraphQLClient interface {
 	GetAllActiveVariantGroupIDs(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetAllActiveVariantGroupIDs, error)
 	CreateOrder(ctx context.Context, input CreateOrderInput, interceptors ...clientv2.RequestInterceptor) (*CreateOrder, error)
+	CompleteOrder(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CompleteOrder, error)
 }
 
 type Client struct {
@@ -27,7 +28,8 @@ type Query struct {
 	AllActiveVariantGroupIDs AllActiveVariantGroupIDs "json:\"allActiveVariantGroupIDs\" graphql:\"allActiveVariantGroupIDs\""
 }
 type Mutation struct {
-	CreateOrder CreateOrderPayload "json:\"createOrder\" graphql:\"createOrder\""
+	CreateOrder   CreateOrderPayload   "json:\"createOrder\" graphql:\"createOrder\""
+	CompleteOrder CompleteOrderPayload "json:\"completeOrder\" graphql:\"completeOrder\""
 }
 type getAllActiveVariantGroupIDs_AllActiveVariantGroupIDs struct {
 	Ids []string "json:\"ids\" graphql:\"ids\""
@@ -48,11 +50,17 @@ type createOrder_CreateOrder struct {
 	TotalPrice  int                                 "json:\"totalPrice\" graphql:\"totalPrice\""
 	OrderResult createOrder_CreateOrder_OrderResult "json:\"orderResult\" graphql:\"orderResult\""
 }
+type completeOrder_CompleteOrder struct {
+	ShopifyActivationURL *string "json:\"shopifyActivationURL\" graphql:\"shopifyActivationURL\""
+}
 type GetAllActiveVariantGroupIDs struct {
 	AllActiveVariantGroupIDs getAllActiveVariantGroupIDs_AllActiveVariantGroupIDs "json:\"allActiveVariantGroupIDs\" graphql:\"allActiveVariantGroupIDs\""
 }
 type CreateOrder struct {
 	CreateOrder createOrder_CreateOrder "json:\"createOrder\" graphql:\"createOrder\""
+}
+type CompleteOrder struct {
+	CompleteOrder completeOrder_CompleteOrder "json:\"completeOrder\" graphql:\"completeOrder\""
 }
 
 const GetAllActiveVariantGroupIDsDocument = `query getAllActiveVariantGroupIDs {
@@ -97,6 +105,26 @@ func (c *Client) CreateOrder(ctx context.Context, input CreateOrderInput, interc
 
 	var res CreateOrder
 	if err := c.Client.Post(ctx, "createOrder", CreateOrderDocument, &res, vars, interceptors...); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CompleteOrderDocument = `mutation completeOrder ($id: String!) {
+	completeOrder(id: $id) {
+		shopifyActivationURL
+	}
+}
+`
+
+func (c *Client) CompleteOrder(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CompleteOrder, error) {
+	vars := map[string]interface{}{
+		"id": id,
+	}
+
+	var res CompleteOrder
+	if err := c.Client.Post(ctx, "completeOrder", CompleteOrderDocument, &res, vars, interceptors...); err != nil {
 		return nil, err
 	}
 
