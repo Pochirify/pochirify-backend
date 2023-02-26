@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/Pochirify/pochirify-backend/internal/domain/payment"
 	"github.com/Pochirify/pochirify-backend/internal/domain/repository"
 	"github.com/joho/godotenv"
 )
@@ -17,6 +18,7 @@ var (
 	databaseID         string
 	shopifyAccessToken string
 	repositories       repository.Repositories
+	paypayClient       payment.PaypayClient
 )
 
 func TestMain(m *testing.M) {
@@ -60,6 +62,13 @@ func TestMain(m *testing.M) {
 	// }
 
 	repositories = initRepositories()
+
+	paypayClient = newPaypayClient(
+		os.Getenv("IS_PAYPAY_PRODUCTION"),
+		os.Getenv("PAYPAY_API_KEY_ID"),
+		os.Getenv("PAYPAY_API_SECRET"),
+		os.Getenv("PAYPAY_MERCHANT_ID"),
+	)
 
 	os.Exit(m.Run())
 }

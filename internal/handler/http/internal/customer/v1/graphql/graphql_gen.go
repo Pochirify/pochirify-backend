@@ -21,12 +21,12 @@ type DeliveryTimeRange struct {
 	To   string `json:"to"`
 }
 
-type Product struct {
-	ID       string   `json:"id"`
-	Title    string   `json:"title"`
-	Price    int      `json:"price"`
-	Contents []string `json:"contents"`
-	ImageURL string   `json:"imageURL"`
+type ProductVariant struct {
+	ID        int      `json:"id"`
+	Title     string   `json:"title"`
+	UnitPrice int      `json:"unitPrice"`
+	Contents  []string `json:"contents"`
+	ImageURL  string   `json:"imageURL"`
 }
 
 type VariantGroup struct {
@@ -34,23 +34,19 @@ type VariantGroup struct {
 	Title               string             `json:"title"`
 	ImageURLs           []string           `json:"imageURLs"`
 	DeliveryTimeRange   *DeliveryTimeRange `json:"deliveryTimeRange"`
-	FaqImageURL         *WebpPngImageURL   `json:"faqImageURL"`
-	DescriptionImageURL *WebpPngImageURL   `json:"descriptionImageURL"`
+	FaqImageURL         string             `json:"faqImageURL"`
+	DescriptionImageURL string             `json:"descriptionImageURL"`
 	BadgeImageURL       string             `json:"badgeImageURL"`
 }
 
 type VariantGroupDetail struct {
-	VariantGroup *VariantGroup `json:"variantGroup"`
-	Variants     []*Product    `json:"variants"`
-}
-
-type WebpPngImageURL struct {
-	WebpURL string `json:"webpURL"`
-	PngURL  string `json:"pngURL"`
+	VariantGroup *VariantGroup     `json:"variantGroup"`
+	Variants     []*ProductVariant `json:"variants"`
 }
 
 type CompleteOrderPayload struct {
 	ShopifyActivationURL *string `json:"shopifyActivationURL"`
+	IsNotOrderCompleted  bool    `json:"isNotOrderCompleted"`
 }
 
 type CreateOrderInput struct {
@@ -71,6 +67,10 @@ type CreateOrderInput struct {
 }
 
 type CreateOrderPayload struct {
+	Order *CreateOrderPayloadOrder `json:"order"`
+}
+
+type CreateOrderPayloadOrder struct {
 	OrderID     string      `json:"orderID"`
 	TotalPrice  int         `json:"totalPrice"`
 	OrderResult OrderResult `json:"orderResult"`

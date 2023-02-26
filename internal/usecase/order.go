@@ -11,7 +11,8 @@ import (
 )
 
 var (
-	errCreateOrder = errors.New("pochirify-backend-internal-usecase-order: failed to create order")
+	errCreateOrder                      = errors.New("pochirify-backend-internal-usecase-order: failed to create order")
+	ErrCompleteOrderOrderIsNotCompleted = errors.New("pochirify-backend-internal-usecase-order: failed to complete order because order is not completed")
 )
 
 func (a App) PayPayTransactionEvent(ctx context.Context) error {
@@ -47,7 +48,7 @@ type CreateOrderOutput struct {
 type OrderUnion struct {
 	// return only one from
 	CreditCardOrder *payment.CreditCardOrder
-	PayPayOrder     *payment.PayPayOrder
+	PayPayOrder     *payment.CreatOrderPayload
 }
 
 func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateOrderOutput, error) {
@@ -80,9 +81,20 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 	if err != nil {
 		return nil, err
 	}
-	isPriceChanged := order.GetTotalPrice() != payload.TotalPrice
 
+	isPriceChanged := order.GetTotalPrice() != payload.TotalPrice
 	order.Update(uint(payload.ShopifyOrderID), payload.TotalPrice)
+
+	paypayPayload, err := a.paypayClient.CreateOrder(
+		ctx,
+		order.ID,
+		int(order.GetTotalPrice()),
+		*input.RedirectURL,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	if err = a.OrderRepo.Create(ctx, order); err != nil {
 		return nil, err
 	}
@@ -92,8 +104,8 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 		TotalPrice:     order.GetTotalPrice(),
 		IsPriceChanged: isPriceChanged,
 		OrderOutput: &OrderUnion{
-			PayPayOrder: &payment.PayPayOrder{
-				URL: *input.RedirectURL,
+			PayPayOrder: &payment.CreatOrderPayload{
+				URL: paypayPayload.URL,
 			},
 		},
 	}, nil
@@ -109,14 +121,17 @@ func (a App) CompleteOrder(ctx context.Context, id string) (*CompleteOrderOutput
 		return nil, fmt.Errorf("failed to find order: %w", err)
 	}
 
+	getOrderPayload, err := a.paypayClient.GetOrder(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get paypay order: %w", err)
+	}
+	if !getOrderPayload.Status.IsStatusCompleted() {
+		return nil, fmt.Errorf("paypay order is not completed: %w", ErrCompleteOrderOrderIsNotCompleted)
+	}
+
 	shopifyOrderGID, err := a.shopifyClient.MarkOrderAsPaid(ctx, order.ShopifyOrderID)
 	if err != nil {
-		switch {
-		case errors.Is(err, shopify.ErrGetShopifyActivationURLAlreadyActivated):
-			break
-		default:
-			return nil, fmt.Errorf("failed to mark order as paid: %w", err)
-		}
+		return nil, fmt.Errorf("failed to mark order as paid: %w", err)
 	}
 
 	url, err := a.shopifyClient.GetShopifyActivationURL(ctx, shopifyOrderGID)

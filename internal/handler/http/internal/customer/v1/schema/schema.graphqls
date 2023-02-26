@@ -16,21 +16,21 @@ enum PaymentMethod {
 }
 # TODO: define Uint32
 
-type Product {
-  id: ID!
+type ProductVariant {
+  id: Int!
   title: String!
-  price: Int!
+  unitPrice: Int!
   contents: [String!]!
   imageURL: String!
 }
 
 type VariantGroup {
-  id: ID!
+  id: String!
   title: String!
   imageURLs: [String!]!
   deliveryTimeRange: DeliveryTimeRange!
-  faqImageURL: WebpPngImageURL!
-  descriptionImageURL: WebpPngImageURL!
+  faqImageURL: String!
+  descriptionImageURL: String!
   badgeImageURL: String!
 }
 
@@ -40,15 +40,10 @@ type DeliveryTimeRange {
   to: String!
 }
 
-type WebpPngImageURL {
-  webpURL: String!
-  pngURL: String!
-}
-
 # query types
 type VariantGroupDetail {
   variantGroup: VariantGroup!
-  variants: [Product!]!
+  variants: [ProductVariant!]!
 }
 
 type AllActiveVariantGroupIDs {
@@ -58,8 +53,6 @@ type AllActiveVariantGroupIDs {
 type Query {
   variantGroupDetail(id: String!): VariantGroupDetail!
   allActiveVariantGroupIDs: AllActiveVariantGroupIDs!
-  # productDetail(id: String!): ProductDetail!
-  # allActiveProductIDs: AllActiveProductIDs!
 }
 
 # input
@@ -83,6 +76,10 @@ input createOrderInput {
 
 # mutation payload
 type createOrderPayload {
+  order: createOrderPayloadOrder
+}
+
+type createOrderPayloadOrder {
   orderID: String!
   totalPrice: Int!
   orderResult: orderResult!
@@ -90,6 +87,7 @@ type createOrderPayload {
 
 type completeOrderPayload {
   shopifyActivationURL: String
+  isNotOrderCompleted: Boolean! # TODO: UserErrorとして定義するべき？
 }
 
 type paypayOrderResult {

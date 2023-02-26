@@ -51,7 +51,6 @@ func run(ctx context.Context) error {
 			env.PayPayApiKeyID,
 			env.PayPayApiSecret,
 			env.PayPayMerchantID,
-			env.PayPayRedirectURL,
 		),
 		CreditCardClient: payment.NewCreditCardClient(env.FincodeApiKey, env.FincodeBaseURL),
 		ShopifyClient:    shopify.NewShopifyClient(env.ShopifyAdminAccessToken),

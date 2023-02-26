@@ -6,15 +6,17 @@ query getAllActiveVariantGroupIDs {
 
 mutation createOrder($input: createOrderInput!) {
   createOrder(input: $input) {
-    orderID
-    totalPrice
-    orderResult {
-      ... on paypayOrderResult {
-        url
-      }
-      ... on creditCardResult {
-        cardOrderID
-        accessID
+    order {
+      orderID
+      totalPrice
+      orderResult {
+        ... on paypayOrderResult {
+          url
+        }
+        ... on creditCardResult {
+          cardOrderID
+          accessID
+        }
       }
     }
   }
@@ -23,5 +25,6 @@ mutation createOrder($input: createOrderInput!) {
 mutation completeOrder($id: String!) {
   completeOrder(id: $id) {
     shopifyActivationURL
+    isNotOrderCompleted
   }
 }
