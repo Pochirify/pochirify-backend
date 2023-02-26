@@ -11,7 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const existingProductVariantID = "44501604106551"
+//NOTE: この商品の在庫がなくなったら、dev環境を使用したこのe2eテストは壊れてしまう。
+const existingProductVariantID = 44501604106551
 
 func defaultCreateOrder(
 	t *testing.T,
@@ -59,15 +60,18 @@ func TestCreateOrder_Normal(t *testing.T) {
 		// run
 		res, err := defaultCreateOrder(t, client, ctx, emailAddress, &redirectURL)
 		require.NoError(t, err)
-		require.NotEqual(t, "", res.CreateOrder.OrderID)
-		assert.Equal(t, 20, res.CreateOrder.TotalPrice)
-		require.NotNil(t, res.CreateOrder.OrderResult)
-		require.NotNil(t, res.CreateOrder.OrderResult.PaypayOrderResult)
-		assert.Equal(t, redirectURL, res.CreateOrder.OrderResult.PaypayOrderResult.URL)
+		require.NotNil(t, res.CreateOrder.Order)
+		assert.NotEqual(t, "", res.CreateOrder.Order.OrderID)
+		assert.Equal(t, 20, res.CreateOrder.Order.TotalPrice)
+		require.NotNil(t, res.CreateOrder.Order.OrderResult)
+		require.NotNil(t, res.CreateOrder.Order.OrderResult.PaypayOrderResult)
+		assert.NotEqual(t, "", res.CreateOrder.Order.OrderResult.PaypayOrderResult.URL)
 
-		// check data
-		order, err := repositories.OrderRepo.Find(ctx, res.CreateOrder.OrderID)
+		// check record
+		order, err := repositories.OrderRepo.Find(ctx, res.CreateOrder.Order.OrderID)
 		require.NoError(t, err)
+
+		// check shopify data
 		shopifyOrderGID := newShopifyOrderGID(order.ShopifyOrderID)
 		orderRes, err := shopifyClient.GetOrder(ctx, shopifyOrderGID)
 		require.NoError(t, err)
@@ -76,7 +80,11 @@ func TestCreateOrder_Normal(t *testing.T) {
 		assert.Equal(t, emailAddress, *orderRes.Order.Email)
 		assert.Equal(t, "PENDING", orderRes.Order.DisplayFinancialStatus.String())
 
-		// TODO: check paypay order is properly created
+		// check papay data
+		paypayOrder, err := paypayClient.GetOrder(ctx, order.ID)
+		require.NoError(t, err)
+		assert.NotEqual(t, "", paypayOrder.Status)
+		assert.Equal(t, "CREATED", paypayOrder.Status.String())
 	})
 
 	t.Run("create a order using credit card", func(t *testing.T) {})

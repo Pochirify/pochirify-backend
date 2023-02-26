@@ -92,10 +92,15 @@ type ComplexityRoot struct {
 	}
 
 	CompleteOrderPayload struct {
+		IsNotOrderCompleted  func(childComplexity int) int
 		ShopifyActivationURL func(childComplexity int) int
 	}
 
 	CreateOrderPayload struct {
+		Order func(childComplexity int) int
+	}
+
+	CreateOrderPayloadOrder struct {
 		OrderID     func(childComplexity int) int
 		OrderResult func(childComplexity int) int
 		TotalPrice  func(childComplexity int) int
@@ -311,6 +316,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.WebpPngImageURL.WebpURL(childComplexity), true
 
+	case "completeOrderPayload.isNotOrderCompleted":
+		if e.complexity.CompleteOrderPayload.IsNotOrderCompleted == nil {
+			break
+		}
+
+		return e.complexity.CompleteOrderPayload.IsNotOrderCompleted(childComplexity), true
+
 	case "completeOrderPayload.shopifyActivationURL":
 		if e.complexity.CompleteOrderPayload.ShopifyActivationURL == nil {
 			break
@@ -318,26 +330,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CompleteOrderPayload.ShopifyActivationURL(childComplexity), true
 
-	case "createOrderPayload.orderID":
-		if e.complexity.CreateOrderPayload.OrderID == nil {
+	case "createOrderPayload.order":
+		if e.complexity.CreateOrderPayload.Order == nil {
 			break
 		}
 
-		return e.complexity.CreateOrderPayload.OrderID(childComplexity), true
+		return e.complexity.CreateOrderPayload.Order(childComplexity), true
 
-	case "createOrderPayload.orderResult":
-		if e.complexity.CreateOrderPayload.OrderResult == nil {
+	case "createOrderPayloadOrder.orderID":
+		if e.complexity.CreateOrderPayloadOrder.OrderID == nil {
 			break
 		}
 
-		return e.complexity.CreateOrderPayload.OrderResult(childComplexity), true
+		return e.complexity.CreateOrderPayloadOrder.OrderID(childComplexity), true
 
-	case "createOrderPayload.totalPrice":
-		if e.complexity.CreateOrderPayload.TotalPrice == nil {
+	case "createOrderPayloadOrder.orderResult":
+		if e.complexity.CreateOrderPayloadOrder.OrderResult == nil {
 			break
 		}
 
-		return e.complexity.CreateOrderPayload.TotalPrice(childComplexity), true
+		return e.complexity.CreateOrderPayloadOrder.OrderResult(childComplexity), true
+
+	case "createOrderPayloadOrder.totalPrice":
+		if e.complexity.CreateOrderPayloadOrder.TotalPrice == nil {
+			break
+		}
+
+		return e.complexity.CreateOrderPayloadOrder.TotalPrice(childComplexity), true
 
 	case "creditCardResult.accessID":
 		if e.complexity.CreditCardResult.AccessID == nil {
@@ -716,12 +735,8 @@ func (ec *executionContext) fieldContext_Mutation_createOrder(ctx context.Contex
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "orderID":
-				return ec.fieldContext_createOrderPayload_orderID(ctx, field)
-			case "totalPrice":
-				return ec.fieldContext_createOrderPayload_totalPrice(ctx, field)
-			case "orderResult":
-				return ec.fieldContext_createOrderPayload_orderResult(ctx, field)
+			case "order":
+				return ec.fieldContext_createOrderPayload_order(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type createOrderPayload", field.Name)
 		},
@@ -780,6 +795,8 @@ func (ec *executionContext) fieldContext_Mutation_completeOrder(ctx context.Cont
 			switch field.Name {
 			case "shopifyActivationURL":
 				return ec.fieldContext_completeOrderPayload_shopifyActivationURL(ctx, field)
+			case "isNotOrderCompleted":
+				return ec.fieldContext_completeOrderPayload_isNotOrderCompleted(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type completeOrderPayload", field.Name)
 		},
@@ -3592,8 +3609,101 @@ func (ec *executionContext) fieldContext_completeOrderPayload_shopifyActivationU
 	return fc, nil
 }
 
-func (ec *executionContext) _createOrderPayload_orderID(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreateOrderPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_createOrderPayload_orderID(ctx, field)
+func (ec *executionContext) _completeOrderPayload_isNotOrderCompleted(ctx context.Context, field graphql.CollectedField, obj *graphql1.CompleteOrderPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_completeOrderPayload_isNotOrderCompleted(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsNotOrderCompleted, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_completeOrderPayload_isNotOrderCompleted(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "completeOrderPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _createOrderPayload_order(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreateOrderPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_createOrderPayload_order(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Order, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*graphql1.CreateOrderPayloadOrder)
+	fc.Result = res
+	return ec.marshalOcreateOrderPayloadOrder2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreateOrderPayloadOrder(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_createOrderPayload_order(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "createOrderPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "orderID":
+				return ec.fieldContext_createOrderPayloadOrder_orderID(ctx, field)
+			case "totalPrice":
+				return ec.fieldContext_createOrderPayloadOrder_totalPrice(ctx, field)
+			case "orderResult":
+				return ec.fieldContext_createOrderPayloadOrder_orderResult(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type createOrderPayloadOrder", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _createOrderPayloadOrder_orderID(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreateOrderPayloadOrder) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_createOrderPayloadOrder_orderID(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3623,9 +3733,9 @@ func (ec *executionContext) _createOrderPayload_orderID(ctx context.Context, fie
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_createOrderPayload_orderID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_createOrderPayloadOrder_orderID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "createOrderPayload",
+		Object:     "createOrderPayloadOrder",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -3636,8 +3746,8 @@ func (ec *executionContext) fieldContext_createOrderPayload_orderID(ctx context.
 	return fc, nil
 }
 
-func (ec *executionContext) _createOrderPayload_totalPrice(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreateOrderPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_createOrderPayload_totalPrice(ctx, field)
+func (ec *executionContext) _createOrderPayloadOrder_totalPrice(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreateOrderPayloadOrder) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_createOrderPayloadOrder_totalPrice(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3667,9 +3777,9 @@ func (ec *executionContext) _createOrderPayload_totalPrice(ctx context.Context, 
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_createOrderPayload_totalPrice(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_createOrderPayloadOrder_totalPrice(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "createOrderPayload",
+		Object:     "createOrderPayloadOrder",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -3680,8 +3790,8 @@ func (ec *executionContext) fieldContext_createOrderPayload_totalPrice(ctx conte
 	return fc, nil
 }
 
-func (ec *executionContext) _createOrderPayload_orderResult(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreateOrderPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_createOrderPayload_orderResult(ctx, field)
+func (ec *executionContext) _createOrderPayloadOrder_orderResult(ctx context.Context, field graphql.CollectedField, obj *graphql1.CreateOrderPayloadOrder) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_createOrderPayloadOrder_orderResult(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3711,9 +3821,9 @@ func (ec *executionContext) _createOrderPayload_orderResult(ctx context.Context,
 	return ec.marshalNorderResult2githubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐOrderResult(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_createOrderPayload_orderResult(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_createOrderPayloadOrder_orderResult(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "createOrderPayload",
+		Object:     "createOrderPayloadOrder",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -4726,6 +4836,13 @@ func (ec *executionContext) _completeOrderPayload(ctx context.Context, sel ast.S
 
 			out.Values[i] = ec._completeOrderPayload_shopifyActivationURL(ctx, field, obj)
 
+		case "isNotOrderCompleted":
+
+			out.Values[i] = ec._completeOrderPayload_isNotOrderCompleted(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4747,23 +4864,48 @@ func (ec *executionContext) _createOrderPayload(ctx context.Context, sel ast.Sel
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("createOrderPayload")
+		case "order":
+
+			out.Values[i] = ec._createOrderPayload_order(ctx, field, obj)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var createOrderPayloadOrderImplementors = []string{"createOrderPayloadOrder"}
+
+func (ec *executionContext) _createOrderPayloadOrder(ctx context.Context, sel ast.SelectionSet, obj *graphql1.CreateOrderPayloadOrder) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, createOrderPayloadOrderImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("createOrderPayloadOrder")
 		case "orderID":
 
-			out.Values[i] = ec._createOrderPayload_orderID(ctx, field, obj)
+			out.Values[i] = ec._createOrderPayloadOrder_orderID(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "totalPrice":
 
-			out.Values[i] = ec._createOrderPayload_totalPrice(ctx, field, obj)
+			out.Values[i] = ec._createOrderPayloadOrder_totalPrice(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "orderResult":
 
-			out.Values[i] = ec._createOrderPayload_orderResult(ctx, field, obj)
+			out.Values[i] = ec._createOrderPayloadOrder_orderResult(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -5598,6 +5740,13 @@ func (ec *executionContext) marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return ec.___Type(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOcreateOrderPayloadOrder2ᚖgithubᚗcomᚋPochirifyᚋpochirifyᚑbackendᚋinternalᚋhandlerᚋhttpᚋinternalᚋcustomerᚋv1ᚋgraphqlᚐCreateOrderPayloadOrder(ctx context.Context, sel ast.SelectionSet, v *graphql1.CreateOrderPayloadOrder) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._createOrderPayloadOrder(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

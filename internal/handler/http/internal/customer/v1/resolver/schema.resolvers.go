@@ -6,16 +6,16 @@ package resolver
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log"
 
 	graphql1 "github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/graphql"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/graphql/request"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/graphql/response"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/schema"
+	"github.com/Pochirify/pochirify-backend/internal/usecase"
 )
 
-// TODO: error文はinternalで閉じる
 func (r *mutationResolver) CreateOrder(ctx context.Context, input graphql1.CreateOrderInput) (*graphql1.CreateOrderPayload, error) {
 	output, err := r.App.CreateOrder(
 		ctx,
@@ -24,7 +24,6 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, input graphql1.Creat
 	if err != nil {
 		return nil, err
 	}
-	log.Println(output)
 
 	payload, err := response.NewCreateOrderPayload(output)
 	if err != nil {
@@ -38,11 +37,20 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, input graphql1.Creat
 func (r *mutationResolver) CompleteOrder(ctx context.Context, id string) (*graphql1.CompleteOrderPayload, error) {
 	output, err := r.App.CompleteOrder(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to complete order: %w", err)
+		switch {
+		case errors.Is(err, usecase.ErrCompleteOrderOrderIsNotCompleted):
+			return &graphql1.CompleteOrderPayload{
+				ShopifyActivationURL: nil,
+				IsNotOrderCompleted:  true,
+			}, nil
+		default:
+			return nil, fmt.Errorf("failed to complete order: %w", err)
+		}
 	}
 
 	return &graphql1.CompleteOrderPayload{
 		ShopifyActivationURL: output.ShopifyActivationURL,
+		IsNotOrderCompleted:  false,
 	}, nil
 }
 

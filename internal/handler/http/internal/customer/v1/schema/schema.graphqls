@@ -83,6 +83,10 @@ input createOrderInput {
 
 # mutation payload
 type createOrderPayload {
+  order: createOrderPayloadOrder
+}
+
+type createOrderPayloadOrder {
   orderID: String!
   totalPrice: Int!
   orderResult: orderResult!
@@ -90,6 +94,7 @@ type createOrderPayload {
 
 type completeOrderPayload {
   shopifyActivationURL: String
+  isNotOrderCompleted: Boolean! # TODO: UserErrorとして定義するべき？
 }
 
 type paypayOrderResult {

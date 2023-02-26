@@ -61,6 +61,7 @@ func NewServer(ctx context.Context, c *Config) *Server {
 			schema.Config{Resolvers: resolver.NewResolver(config)},
 		),
 	)
+	srv.SetErrorPresenter(middleware.NewErrorHandler(newLoggerFactory(c.Logger.WithName("error_handler"))))
 
 	webhookHandler := webhookv1.NewWebhookHandler(app)
 	r.Handle("/api/webhook", webhookHandler.PayPayTransactionEventHandler())

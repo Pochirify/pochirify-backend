@@ -2,14 +2,11 @@ package payment
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/Pochirify/pochirify-backend/internal/domain/payment"
 	"github.com/mythrnr/paypayopa-sdk-go"
 )
-
-var errCreatePayPayOrder = errors.New("pochirify-backend-internal-handler-payment-paypay: failed to create order")
 
 type Environment int
 
@@ -24,26 +21,45 @@ type paypayClient struct {
 	apiKeyID     string
 	apiKeySecret string
 	merchantID   string
-	redirectURL  string
 }
 
 func NewPaypayClient(
 	isProduction bool,
 	apiKeyID,
 	apiKeySecret,
-	merchantIDcreditCardClient,
-	redirectURL string,
+	merchantID string,
 ) payment.PaypayClient {
 	return &paypayClient{
 		isProduction: isProduction,
 		apiKeyID:     apiKeyID,
 		apiKeySecret: apiKeySecret,
-		merchantID:   merchantIDcreditCardClient,
-		redirectURL:  redirectURL,
+		merchantID:   merchantID,
 	}
 }
 
-func (r *paypayClient) CreateOrder(ctx context.Context, orderID string, price int, redirectURL string) (*payment.PayPayOrder, error) {
+func (r *paypayClient) GetOrder(ctx context.Context, orderID string) (*payment.GetOrderPayload, error) {
+	cred := paypayopa.NewCredentials(
+		r.getEnv(),
+		r.apiKeyID,
+		r.apiKeySecret,
+		r.merchantID,
+	)
+	wp := paypayopa.NewWebPayment(cred)
+
+	res, info, err := wp.GetPaymentDetails(ctx, orderID)
+	if err != nil {
+		return nil, fmt.Errorf("failed GetOrder: %w", err)
+	}
+	if !info.Success() {
+		return nil, fmt.Errorf("failed GetOrder: %v", info)
+	}
+
+	return &payment.GetOrderPayload{
+		Status: payment.GetPayPayOrderStatus(res.Status),
+	}, nil
+}
+
+func (r *paypayClient) CreateOrder(ctx context.Context, orderID string, totalPrice int, redirectURL string) (*payment.CreatOrderPayload, error) {
 	cred := paypayopa.NewCredentials(
 		r.getEnv(),
 		r.apiKeyID,
@@ -55,7 +71,7 @@ func (r *paypayClient) CreateOrder(ctx context.Context, orderID string, price in
 	res, info, err := wp.CreateQRCode(ctx, &paypayopa.CreateQRCodePayload{
 		MerchantPaymentID: orderID,
 		Amount: &paypayopa.MoneyAmount{
-			Amount:   price,
+			Amount:   totalPrice,
 			Currency: paypayopa.CurrencyJPY,
 		},
 		CodeType:     paypayopa.CodeTypeOrderQR,
@@ -63,13 +79,13 @@ func (r *paypayClient) CreateOrder(ctx context.Context, orderID string, price in
 		RedirectType: paypayopa.RedirectTypeWebLink,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", err, errCreatePayPayOrder)
+		return nil, fmt.Errorf("failed CreateOrder: %w", err)
 	}
 	if !info.Success() {
-		return nil, fmt.Errorf("%v: %w", info, errCreatePayPayOrder)
+		return nil, fmt.Errorf("failed CreateOrder: %v", info)
 	}
 
-	return &payment.PayPayOrder{
+	return &payment.CreatOrderPayload{
 		URL: res.URL,
 	}, nil
 }

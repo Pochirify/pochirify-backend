@@ -34,24 +34,28 @@ type Mutation struct {
 type getAllActiveVariantGroupIDs_AllActiveVariantGroupIDs struct {
 	Ids []string "json:\"ids\" graphql:\"ids\""
 }
-type createOrder_CreateOrder_OrderResult_PaypayOrderResult struct {
+type createOrder_CreateOrder_Order_OrderResult_PaypayOrderResult struct {
 	URL string "json:\"url\" graphql:\"url\""
 }
-type createOrder_CreateOrder_OrderResult_CreditCardResult struct {
+type createOrder_CreateOrder_Order_OrderResult_CreditCardResult struct {
 	CardOrderID string "json:\"cardOrderID\" graphql:\"cardOrderID\""
 	AccessID    string "json:\"accessID\" graphql:\"accessID\""
 }
-type createOrder_CreateOrder_OrderResult struct {
-	PaypayOrderResult createOrder_CreateOrder_OrderResult_PaypayOrderResult "graphql:\"... on paypayOrderResult\""
-	CreditCardResult  createOrder_CreateOrder_OrderResult_CreditCardResult  "graphql:\"... on creditCardResult\""
+type createOrder_CreateOrder_Order_OrderResult struct {
+	PaypayOrderResult createOrder_CreateOrder_Order_OrderResult_PaypayOrderResult "graphql:\"... on paypayOrderResult\""
+	CreditCardResult  createOrder_CreateOrder_Order_OrderResult_CreditCardResult  "graphql:\"... on creditCardResult\""
+}
+type createOrder_CreateOrder_Order struct {
+	OrderID     string                                    "json:\"orderID\" graphql:\"orderID\""
+	TotalPrice  int                                       "json:\"totalPrice\" graphql:\"totalPrice\""
+	OrderResult createOrder_CreateOrder_Order_OrderResult "json:\"orderResult\" graphql:\"orderResult\""
 }
 type createOrder_CreateOrder struct {
-	OrderID     string                              "json:\"orderID\" graphql:\"orderID\""
-	TotalPrice  int                                 "json:\"totalPrice\" graphql:\"totalPrice\""
-	OrderResult createOrder_CreateOrder_OrderResult "json:\"orderResult\" graphql:\"orderResult\""
+	Order *createOrder_CreateOrder_Order "json:\"order\" graphql:\"order\""
 }
 type completeOrder_CompleteOrder struct {
 	ShopifyActivationURL *string "json:\"shopifyActivationURL\" graphql:\"shopifyActivationURL\""
+	IsNotOrderCompleted  bool    "json:\"isNotOrderCompleted\" graphql:\"isNotOrderCompleted\""
 }
 type GetAllActiveVariantGroupIDs struct {
 	AllActiveVariantGroupIDs getAllActiveVariantGroupIDs_AllActiveVariantGroupIDs "json:\"allActiveVariantGroupIDs\" graphql:\"allActiveVariantGroupIDs\""
@@ -83,15 +87,17 @@ func (c *Client) GetAllActiveVariantGroupIDs(ctx context.Context, interceptors .
 
 const CreateOrderDocument = `mutation createOrder ($input: createOrderInput!) {
 	createOrder(input: $input) {
-		orderID
-		totalPrice
-		orderResult {
-			... on paypayOrderResult {
-				url
-			}
-			... on creditCardResult {
-				cardOrderID
-				accessID
+		order {
+			orderID
+			totalPrice
+			orderResult {
+				... on paypayOrderResult {
+					url
+				}
+				... on creditCardResult {
+					cardOrderID
+					accessID
+				}
 			}
 		}
 	}
@@ -114,6 +120,7 @@ func (c *Client) CreateOrder(ctx context.Context, input CreateOrderInput, interc
 const CompleteOrderDocument = `mutation completeOrder ($id: String!) {
 	completeOrder(id: $id) {
 		shopifyActivationURL
+		isNotOrderCompleted
 	}
 }
 `

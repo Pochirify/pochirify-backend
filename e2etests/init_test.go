@@ -4,6 +4,7 @@ package e2etests
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"testing"
@@ -12,10 +13,13 @@ import (
 	appspanner "github.com/Pochirify/pochirify-backend/internal/handler/db/spanner"
 	"github.com/Pochirify/pochirify-backend/internal/handler/logger"
 	"github.com/Pochirify/pochirify-backend/internal/handler/logger/json"
+	hpayment "github.com/Pochirify/pochirify-backend/internal/handler/payment"
 	"github.com/Yamashou/gqlgenc/clientv2"
 
 	"github.com/Pochirify/pochirify-backend/e2etests/gqlgenc"
 	shopify "github.com/Pochirify/pochirify-backend/e2etests/shopify/gqlgenc"
+
+	"github.com/Pochirify/pochirify-backend/internal/domain/payment"
 	"github.com/Pochirify/pochirify-backend/internal/domain/repository"
 )
 
@@ -51,6 +55,33 @@ func initRepositories() repository.Repositories {
 	}
 
 	return appspanner.InitRepositories(appspanner.NewSpanner(client, newLoggerFactory()))
+}
+
+func newPaypayClient(
+	isPayPayProduction,
+	paypayApiKeyID,
+	paypayApiSecret,
+	paypayMerchantID string,
+) payment.PaypayClient {
+	isProduction := false
+	if isPayPayProduction == "true" {
+		isProduction = true
+	}
+	if paypayApiKeyID == "" {
+		log.Println("paypay api key id not provided")
+	}
+	if paypayApiSecret == "" {
+		log.Panicln("paypay api secret not provided")
+	}
+	if paypayMerchantID == "" {
+		log.Println("paypay merchant id not provided")
+	}
+	return hpayment.NewPaypayClient(
+		isProduction,
+		paypayApiKeyID,
+		paypayApiSecret,
+		paypayMerchantID,
+	)
 }
 
 func newLoggerFactory() logger.Factory {

@@ -14,9 +14,11 @@ func NewCreateOrderPayload(output *usecase.CreateOrderOutput) (*graphql.CreateOr
 	}
 
 	return &graphql.CreateOrderPayload{
-		OrderID:     output.OrderID,
-		TotalPrice:  int(output.TotalPrice),
-		OrderResult: orderResult,
+		Order: &graphql.CreateOrderPayloadOrder{
+			OrderID:     output.OrderID,
+			TotalPrice:  int(output.TotalPrice),
+			OrderResult: orderResult,
+		},
 	}, nil
 }
 
