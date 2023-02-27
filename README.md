@@ -1,4 +1,4 @@
-# Pochirfy is a EC platform that gathers new users and transfers user data to partner's EC site with UI specialized for first-time users.
+# Pochirfy is a EC platform that gathers new users and transfers user data to partner's EC site with UI/UX specialized for first-time users.
 Partners are only those vendors that have shopify EC site.
 (this app don't actually sell products, and is not completed)
 
