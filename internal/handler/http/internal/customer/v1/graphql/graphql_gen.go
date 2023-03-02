@@ -51,7 +51,6 @@ type CompleteOrderPayload struct {
 
 type CreateOrderInput struct {
 	ProductVariantID int           `json:"productVariantID"`
-	UnitPrice        int           `json:"unitPrice"`
 	Quantity         int           `json:"quantity"`
 	PaymentMethod    PaymentMethod `json:"paymentMethod"`
 	RedirectURL      *string       `json:"redirectURL"`

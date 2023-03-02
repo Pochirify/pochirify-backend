@@ -21,7 +21,6 @@ func (a App) PayPayTransactionEvent(ctx context.Context) error {
 
 type CreateOrderInput struct {
 	ProductVariantID uint
-	UnitPrice        uint
 	Quantity         uint
 	PaymentMethod    model.PaymentMethod
 	RedirectURL      *string // for paypay
@@ -41,7 +40,6 @@ type CreateOrderOutput struct {
 	// TODO: add other
 	OrderID        string
 	TotalPrice     uint
-	IsPriceChanged bool
 	OrderOutput    *OrderUnion
 }
 
@@ -55,7 +53,6 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 	order, err := model.NewOrder(
 		model.PaymentMethodPayPay,
 		input.ProductVariantID,
-		input.UnitPrice,
 		input.Quantity,
 	)
 	if err != nil {
@@ -79,10 +76,9 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 	payload, err := a.shopifyClient.CreatePendingOrder(ctx, input.Quantity, input.ProductVariantID, shippingAddress)
 	// TODO: handle inventory
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("shopifyClient.CreatePendingOrder failed: %w", err)
 	}
 
-	isPriceChanged := order.GetTotalPrice() != payload.TotalPrice
 	order.Update(uint(payload.ShopifyOrderID), payload.TotalPrice)
 
 	paypayPayload, err := a.paypayClient.CreateOrder(
@@ -92,7 +88,7 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 		*input.RedirectURL,
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("paypayClient.CreateOrder failed: %w", err)
 	}
 
 	if err = a.OrderRepo.Create(ctx, order); err != nil {
@@ -102,7 +98,6 @@ func (a App) CreateOrder(ctx context.Context, input *CreateOrderInput) (*CreateO
 	return &CreateOrderOutput{
 		OrderID:        order.ID,
 		TotalPrice:     order.GetTotalPrice(),
-		IsPriceChanged: isPriceChanged,
 		OrderOutput: &OrderUnion{
 			PayPayOrder: &payment.CreatOrderPayload{
 				URL: paypayPayload.URL,

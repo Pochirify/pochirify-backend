@@ -9,10 +9,10 @@ import (
 	"cloud.google.com/go/spanner"
 	gqlhandler "github.com/99designs/gqlgen/graphql/handler"
 	appspanner "github.com/Pochirify/pochirify-backend/internal/handler/db/spanner"
+	"github.com/Pochirify/pochirify-backend/internal/handler/ec/shopify"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 
-	"github.com/Pochirify/pochirify-backend/internal/domain/ec/shopify"
 	"github.com/Pochirify/pochirify-backend/internal/domain/payment"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/resolver"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http/internal/customer/v1/schema"
@@ -34,7 +34,7 @@ type Config struct {
 
 	PayPayClient     payment.PaypayClient
 	CreditCardClient payment.CreditCardClient
-	ShopifyClient    shopify.ShopifyClient
+	ShopifyAdminAccessToken string
 }
 
 func NewServer(ctx context.Context, c *Config) *Server {
@@ -51,7 +51,7 @@ func NewServer(ctx context.Context, c *Config) *Server {
 	app := usecase.NewApp(&usecase.Config{
 		PaypayClient:     c.PayPayClient,
 		CreditCardClient: c.CreditCardClient,
-		ShopifyClient:    c.ShopifyClient,
+		ShopifyClient:    shopify.NewShopifyClient(c.ShopifyAdminAccessToken, newLoggerFactory(c.Logger.WithName("shopify_client"))),
 		Repositories:     repositories,
 	})
 

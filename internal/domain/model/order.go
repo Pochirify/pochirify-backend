@@ -45,7 +45,6 @@ type Order struct {
 func NewOrder(
 	paymentMethod PaymentMethod,
 	productVariantID,
-	unitPrice uint,
 	quantity uint,
 ) (*Order, error) {
 	if quantity == 0 {
@@ -56,7 +55,6 @@ func NewOrder(
 		Status:           PaymentStatusPending,
 		PaymentMethod:    paymentMethod,
 		ProductVariantID: productVariantID,
-		UnitPrice:        unitPrice,
 		Quantity:         quantity,
 	}, nil
 }

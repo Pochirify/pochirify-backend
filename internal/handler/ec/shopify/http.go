@@ -175,7 +175,7 @@ func (client shopifyClient) CreatePendingOrder(
 		}
 	}
 
-	// TODO: logにrespのメッセージを出すべき
+	client.logger(ctx).Error(fmt.Errorf(string(resBody)), "failed to create order")
 	return nil, fmt.Errorf("unexpected create order error occurred. statusCode=%d", resp.StatusCode)
 }
 

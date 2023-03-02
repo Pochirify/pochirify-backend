@@ -23,12 +23,12 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, input graphql1.Creat
 		request.NewCreateOrderInput(input),
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create order: %w", err)
 	}
 
 	payload, err := response.NewCreateOrderPayload(output)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create order payload: %w", err)
 	}
 
 	return payload, nil
@@ -75,7 +75,7 @@ func (r *queryResolver) VariantGroupDetail(ctx context.Context, id string) (*gra
 		},
 		Variants: []*graphql1.ProductVariant{
 			{
-				ID:        8179952189751,
+				ID:        44794996293943,
 				Title:     "お歳暮 ギフトセット",
 				UnitPrice: 4800,
 				Contents: []string{
@@ -85,7 +85,7 @@ func (r *queryResolver) VariantGroupDetail(ctx context.Context, id string) (*gra
 				ImageURL: "https://storage.googleapis.com/adfsafdafd/image%2010%20(1).png",
 			},
 			{
-				ID:        8179952976183,
+				ID:        44794997899575,
 				Title:     "お歳暮 ギフトセット2",
 				UnitPrice: 3800,
 				Contents: []string{
@@ -95,7 +95,7 @@ func (r *queryResolver) VariantGroupDetail(ctx context.Context, id string) (*gra
 				ImageURL: "https://storage.googleapis.com/pochirify-dev-server-assets/product_images/pic_prod_02%202.png",
 			},
 			{
-				ID:        8179953402167,
+				ID:        44794998325559,
 				Title:     "お歳暮 ギフトセット2",
 				UnitPrice: 2800,
 				Contents: []string{

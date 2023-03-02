@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/Pochirify/pochirify-backend/internal/handler/db/spanner"
-	"github.com/Pochirify/pochirify-backend/internal/handler/ec/shopify"
 	"github.com/Pochirify/pochirify-backend/internal/handler/http"
 	"github.com/Pochirify/pochirify-backend/internal/handler/logger/json"
 	"github.com/Pochirify/pochirify-backend/internal/handler/payment"
@@ -53,7 +52,7 @@ func run(ctx context.Context) error {
 			env.PayPayMerchantID,
 		),
 		CreditCardClient: payment.NewCreditCardClient(env.FincodeApiKey, env.FincodeBaseURL),
-		ShopifyClient:    shopify.NewShopifyClient(env.ShopifyAdminAccessToken),
+		ShopifyAdminAccessToken:    env.ShopifyAdminAccessToken,
 	}
 
 	// TODO: graceful shutdown

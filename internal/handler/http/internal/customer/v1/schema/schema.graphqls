@@ -58,7 +58,6 @@ type Query {
 # input
 input createOrderInput {
   productVariantID: Int!
-  unitPrice: Int!
   quantity: Int!
   paymentMethod: PaymentMethod!
   redirectURL: String

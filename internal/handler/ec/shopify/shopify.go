@@ -6,6 +6,7 @@ import (
 
 	"github.com/Pochirify/pochirify-backend/internal/domain/ec/shopify"
 	gqlgenc "github.com/Pochirify/pochirify-backend/internal/handler/ec/shopify/gqlgenc"
+	"github.com/Pochirify/pochirify-backend/internal/handler/logger"
 	"github.com/Yamashou/gqlgenc/clientv2"
 )
 
@@ -18,9 +19,10 @@ type shopifyClient struct {
 	restBaseURL   string
 	accessToken   string
 	graphqlClient gqlgenc.ShopifyAdminClient
+	logger logger.Factory
 }
 
-func NewShopifyClient(accessToken string) shopify.ShopifyClient {
+func NewShopifyClient(accessToken string, logger logger.Factory) shopify.ShopifyClient {
 	return &shopifyClient{
 		restBaseURL: "https://kounosuke-test.myshopify.com/admin/api/2023-01/",
 		accessToken: accessToken,
@@ -32,5 +34,6 @@ func NewShopifyClient(accessToken string) shopify.ShopifyClient {
 				return next(ctx, req, gqlInfo, res)
 			},
 		),
+		logger: logger,
 	}
 }

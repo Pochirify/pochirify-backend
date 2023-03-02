@@ -19,7 +19,7 @@ func NewRequestLogger(lf logger.Factory) func(http.Handler) http.Handler {
 				"host", r.URL.Hostname(),
 				"path", r.URL.Path,
 				"operation", queryInfo.getOperation(),
-				"queryName", queryInfo.getName(),
+				"queryName", queryInfo.getOperationName(),
 			).Info("http request")
 
 			lrw := newLoggingResponseWriter(r, w)

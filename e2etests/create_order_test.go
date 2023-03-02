@@ -31,7 +31,6 @@ func defaultCreateOrder(
 		ctx,
 		gqlgenc.CreateOrderInput{
 			ProductVariantID: existingProductVariantID,
-			UnitPrice:        10,
 			Quantity:         2,
 			PaymentMethod:    gqlgenc.PaymentMethodPaypay,
 			RedirectURL:      redirectURL,

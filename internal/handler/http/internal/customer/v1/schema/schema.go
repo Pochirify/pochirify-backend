@@ -3858,7 +3858,7 @@ func (ec *executionContext) unmarshalInputcreateOrderInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"productVariantID", "unitPrice", "quantity", "paymentMethod", "redirectURL", "phoneNumber", "emailAddress", "zipCode", "prefecture", "city", "streetAddress", "building", "lastName", "firstName"}
+	fieldsInOrder := [...]string{"productVariantID", "quantity", "paymentMethod", "redirectURL", "phoneNumber", "emailAddress", "zipCode", "prefecture", "city", "streetAddress", "building", "lastName", "firstName"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -3870,14 +3870,6 @@ func (ec *executionContext) unmarshalInputcreateOrderInput(ctx context.Context, 
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productVariantID"))
 			it.ProductVariantID, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "unitPrice":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("unitPrice"))
-			it.UnitPrice, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}

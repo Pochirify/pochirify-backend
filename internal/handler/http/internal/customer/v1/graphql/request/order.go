@@ -10,7 +10,6 @@ func NewCreateOrderInput(i graphql.CreateOrderInput) *usecase.CreateOrderInput {
 	// TODO: validate uint or define uint as scaler
 	return &usecase.CreateOrderInput{
 		ProductVariantID: uint(i.ProductVariantID),
-		UnitPrice:        uint(i.UnitPrice),
 		Quantity:         uint(i.Quantity),
 		PaymentMethod:    getPaymentMethod(i.PaymentMethod),
 		RedirectURL:      i.RedirectURL,

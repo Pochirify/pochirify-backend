@@ -2,15 +2,16 @@ package middleware
 
 import (
 	"bytes"
-	"fmt"
+	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"strings"
 )
 
 type queryInfo struct {
-	operation string
-	name      string
+	operation     string
+	operationName string
 }
 
 func (q *queryInfo) getOperation() string {
@@ -20,11 +21,16 @@ func (q *queryInfo) getOperation() string {
 	return q.operation
 }
 
-func (q *queryInfo) getName() string {
+func (q *queryInfo) getOperationName() string {
 	if q == nil {
 		return ""
 	}
-	return q.name
+	return q.operationName
+}
+
+type requestBody struct {
+	OperationName string `json:"operationName"`
+	Query         string `json:"query"`
 }
 
 func getQueryInfo(r *http.Request) (*queryInfo, error) {
@@ -35,14 +41,18 @@ func getQueryInfo(r *http.Request) (*queryInfo, error) {
 	// 消費されてしまったRequest Bodyを修復する
 	r.Body = io.NopCloser(bytes.NewBuffer(bufOfRequestBody))
 
-	body := string(bufOfRequestBody)
-	splitted := strings.Split(body, " ")
+	var requestBody requestBody
+	if err = json.Unmarshal(bufOfRequestBody, &requestBody); err != nil {
+		return nil, err
+	}
+
+	splitted := strings.Split(requestBody.Query, " ")
 	if len(splitted) < 2 {
-		return nil, fmt.Errorf("unexpected body: %s", body)
+		return nil, errors.New("unexpected body")
 	}
 
 	return &queryInfo{
-		operation: splitted[0],
-		name:      splitted[1],
+		operation:     splitted[0],
+		operationName: requestBody.OperationName,
 	}, nil
 }
